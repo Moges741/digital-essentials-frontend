@@ -13,7 +13,6 @@ import Button            from '../../components/ui/Button';
 import { getDashboardByRole } from '../../utils/constants';
 
 // ── Zod validation schema ─────────────────────────────────────
-// Mirrors your backend validation rules exactly
 const loginSchema = z.object({
   email:    z.string().min(1, 'Email is required').email('Please enter a valid email'),
   password: z.string().min(1, 'Password is required'),
