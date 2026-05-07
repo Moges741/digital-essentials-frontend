@@ -1,6 +1,15 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
-import ProtectedRoute from './components/guards/ProtectedRoute';
-import RoleGuard      from './components/guards/RoleGuard';
+
+// Layout
+import Navbar           from './components/layout/Navbar';
+import Footer           from './components/layout/Footer';
+import DashboardLayout  from './components/layout/DashboardLayout';
+
+// Guards
+import ProtectedRoute   from './components/guards/ProtectedRoute';
+import RoleGuard        from './components/guards/RoleGuard';
+
+// Pages
 import HomePage           from './pages/home/HomePage';
 import LoginPage          from './pages/auth/LoginPage';
 import RegisterPage       from './pages/auth/RegisterPage';
@@ -17,44 +26,91 @@ import ExercisePage       from './pages/exercises/ExercisePage';
 import ChatPage           from './pages/chat/ChatPage';
 import NotFoundPage       from './pages/NotFoundPage';
 
+// ── Public Layout wrapper ─────────────────────────────────────
+const PublicLayout = ({ children }: { children: React.ReactNode }) => (
+  <div className="flex flex-col min-h-screen">
+    <Navbar />
+    <main className="flex-1 pt-16">
+      {children}
+    </main>
+    <Footer />
+  </div>
+);
+
+// ── Authenticated Layout wrapper ──────────────────────────────
+const AuthLayout = ({ children }: { children: React.ReactNode }) => (
+  <DashboardLayout>{children}</DashboardLayout>
+);
+
 const App = () => {
   return (
     <Routes>
 
       {/* ── Public Routes ──────────────────────────── */}
-      <Route path="/"        element={<HomePage />} />
-      <Route path="/login"   element={<LoginPage />} />
-      <Route path="/register" element={<RegisterPage />} />
-      <Route path="/courses" element={<CoursesPage />} />
-      <Route path="/courses/:course_id" element={<CourseDetailPage />} />
+      <Route path="/" element={
+        <PublicLayout><HomePage /></PublicLayout>
+      } />
+      <Route path="/login" element={
+        <PublicLayout><LoginPage /></PublicLayout>
+      } />
+      <Route path="/register" element={
+        <PublicLayout><RegisterPage /></PublicLayout>
+      } />
+      <Route path="/courses" element={
+        <PublicLayout><CoursesPage /></PublicLayout>
+      } />
+      <Route path="/courses/:course_id" element={
+        <PublicLayout><CourseDetailPage /></PublicLayout>
+      } />
 
-      {/* ── Protected Routes (must be logged in) ───── */}
+      {/* ── Protected Routes ───────────────────────── */}
       <Route element={<ProtectedRoute />}>
-        <Route path="/chat" element={<ChatPage />} />
 
-        {/* Learner routes */}
+        <Route path="/chat" element={
+          <AuthLayout><ChatPage /></AuthLayout>
+        } />
+
+        {/* Learner */}
         <Route element={<RoleGuard allowedRoles={['learner']} />}>
-          <Route path="/dashboard"              element={<LearnerDashboard />} />
-          <Route path="/dashboard/progress"     element={<ProgressPage />} />
-          <Route path="/dashboard/certificates" element={<CertificatesPage />} />
-          <Route path="/courses/:course_id/lessons/:lesson_id" element={<LessonPage />} />
-          <Route path="/courses/:course_id/exercises/:exercise_id" element={<ExercisePage />} />
+          <Route path="/dashboard" element={
+            <AuthLayout><LearnerDashboard /></AuthLayout>
+          } />
+          <Route path="/dashboard/progress" element={
+            <AuthLayout><ProgressPage /></AuthLayout>
+          } />
+          <Route path="/dashboard/certificates" element={
+            <AuthLayout><CertificatesPage /></AuthLayout>
+          } />
+          <Route path="/courses/:course_id/lessons/:lesson_id" element={
+            <AuthLayout><LessonPage /></AuthLayout>
+          } />
+          <Route path="/courses/:course_id/exercises/:exercise_id" element={
+            <AuthLayout><ExercisePage /></AuthLayout>
+          } />
         </Route>
 
-        {/* Mentor routes */}
+        {/* Mentor */}
         <Route element={<RoleGuard allowedRoles={['mentor', 'administrator']} />}>
-          <Route path="/mentor"                element={<MentorDashboard />} />
-          <Route path="/mentor/courses/create" element={<CreateCoursePage />} />
+          <Route path="/mentor" element={
+            <AuthLayout><MentorDashboard /></AuthLayout>
+          } />
+          <Route path="/mentor/courses/create" element={
+            <AuthLayout><CreateCoursePage /></AuthLayout>
+          } />
         </Route>
 
+        {/* Admin */}
         <Route element={<RoleGuard allowedRoles={['administrator']} />}>
-          <Route path="/admin" element={<AdminDashboard />} />
+          <Route path="/admin" element={
+            <AuthLayout><AdminDashboard /></AuthLayout>
+          } />
         </Route>
+
       </Route>
 
       {/* ── Fallback ────────────────────────────────── */}
-      <Route path="/404"  element={<NotFoundPage />} />
-      <Route path="*"     element={<Navigate to="/404" replace />} />
+      <Route path="/404" element={<NotFoundPage />} />
+      <Route path="*"    element={<Navigate to="/404" replace />} />
 
     </Routes>
   );
