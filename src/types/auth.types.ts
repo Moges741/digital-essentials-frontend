@@ -1,3 +1,4 @@
+// src/types/auth.types.ts
 
 export type Role = 'learner' | 'mentor' | 'administrator';
 
@@ -8,6 +9,7 @@ export interface User {
   role:       Role;
   is_active:  boolean;
   created_at: string;
+  updated_at: string;
 }
 
 export interface AuthResponse {
@@ -27,4 +29,12 @@ export interface RegisterBody {
   role:            Role;
   specialization?: string;
   qualifications?: string;
+}
+
+// API response wrapper — matches your backend exactly
+export interface ApiResponse<T> {
+  success: boolean;
+  message: string;
+  data:    T;
+  errors?: string[];
 }

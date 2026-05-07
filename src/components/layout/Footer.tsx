@@ -27,7 +27,7 @@ const Footer = () => {
 
           {/* Credit */}
           <p className="text-xs text-gray-400 text-center">
-            Jimma Institute of Technology — CBTP Phase II
+            Jimma Institute of Technology — CBTP
             <br />
             Bosa Addis Kebele, Jimma, Ethiopia
           </p>
