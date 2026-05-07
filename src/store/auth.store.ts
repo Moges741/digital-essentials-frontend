@@ -1,18 +1,15 @@
-
 import { create } from 'zustand';
 import type { User }   from '../types/auth.types';
 import { tokenUtils } from '../utils/token';
-
 interface AuthState {
   // State
   user:          User | null;
   token:         string | null;
   isAuthenticated: boolean;
-
   // Actions
   setAuth:  (user: User, token: string) => void;
   logout:   () => void;
-  hydrate:  () => void;  // restore from localStorage on page refresh
+  hydrate:  () => void;  
 }
 
 export const useAuthStore = create<AuthState>((set) => ({
