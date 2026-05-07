@@ -26,7 +26,6 @@ apiClient.interceptors.request.use(
 
 // ── Response Interceptor ──────────────────────────────────────
 // Runs after EVERY response comes back
-// If 401 → token expired → clear everything → redirect to login
 apiClient.interceptors.response.use(
   (response) => response,
   (error) => {
