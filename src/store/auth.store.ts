@@ -49,17 +49,17 @@ export const useAuthStore = create<AuthState>((set) => ({
       }
 
       // Restore user from token payload
-      // Note: this is basic info — full profile fetched separately
       set({
         token,
         isAuthenticated: true,
         user: {
           user_id:    payload.user_id,
-          name:       payload.name  ?? '',
+          name:       payload.name,
           email:      payload.email,
           role:       payload.role,
           is_active:  true,
           created_at: '',
+          updated_at: '',
         },
       });
     } catch {

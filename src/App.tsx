@@ -13,6 +13,7 @@ import RoleGuard        from './components/guards/RoleGuard';
 import HomePage           from './pages/home/HomePage';
 import LoginPage          from './pages/auth/LoginPage';
 import RegisterPage       from './pages/auth/RegisterPage';
+import GoogleCallbackPage from './pages/auth/GoogleCallbackPage';
 import CoursesPage        from './pages/courses/CoursesPage';
 import CourseDetailPage   from './pages/courses/CourseDetailPage';
 import CreateCoursePage   from './pages/courses/CreateCoursePage';
@@ -25,6 +26,7 @@ import CertificatesPage   from './pages/certificates/CertificatesPage';
 import ExercisePage       from './pages/exercises/ExercisePage';
 import ChatPage           from './pages/chat/ChatPage';
 import NotFoundPage       from './pages/NotFoundPage';
+import EmailVerificationPage from './pages/auth/EmailVerificationPage';
 
 // ── Public Layout wrapper ─────────────────────────────────────
 const PublicLayout = ({ children }: { children: React.ReactNode }) => (
@@ -55,6 +57,9 @@ const App = () => {
       } />
       <Route path="/register" element={
         <PublicLayout><RegisterPage /></PublicLayout>
+      } />
+      <Route path="/auth/google/callback" element={
+        <PublicLayout><GoogleCallbackPage /></PublicLayout>
       } />
       <Route path="/courses" element={
         <PublicLayout><CoursesPage /></PublicLayout>
@@ -105,6 +110,9 @@ const App = () => {
             <AuthLayout><AdminDashboard /></AuthLayout>
           } />
         </Route>
+        <Route path="/verify-email" element={
+  <PublicLayout><EmailVerificationPage /></PublicLayout>
+} />
 
       </Route>
 

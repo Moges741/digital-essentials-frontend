@@ -44,10 +44,15 @@ export const useRegister = () => {
   return useMutation({
     mutationFn: (body: RegisterBody) => authApi.register(body),
 
-    onSuccess: (data) => {
-      setAuth(data.user, data.token);
-      toast.success(`Account created! Welcome, ${data.user.name}!`);
-      navigate(getDashboardByRole(data.user.role));
+    // onSuccess: (data) => {
+    //   setAuth(data.user, data.token);
+    //   toast.success(`Account created! Welcome, ${data.user.name}!`);
+    //   navigate(getDashboardByRole(data.user.role));
+    // },
+     onSuccess: (data) => {
+      // Don't auto-login, show verification message
+      toast.success('Account created! Please check your email to verify your account.');
+      navigate('/login');  // Or stay on register with message
     },
 
     onError: (error: any) => {
