@@ -1,4 +1,3 @@
-
 import { useState }          from 'react';
 import {
   FileText, Volume2, Video,
@@ -36,7 +35,7 @@ const iconBg: Record<FileType, string> = {
   worksheet: 'bg-green-50',
 };
 
-// ── Single material row ───────────────────────────────────────
+// ── Single material row ───────────────
 const MaterialRow = ({
   material,
   course_id,
