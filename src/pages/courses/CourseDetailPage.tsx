@@ -187,9 +187,15 @@ const CourseDetailPage = () => {
                       key={lesson.lesson_id}
                       onClick={() => {
                         if (isAccessible) {
-                          navigate(
-                            `/courses/${courseId}/lessons/${lesson.lesson_id}`
-                          );
+                          if (canManage) {
+                            navigate(
+                              `/mentor/courses/${courseId}/lessons/${lesson.lesson_id}/edit`
+                            );
+                          } else {
+                            navigate(
+                              `/courses/${courseId}/lessons/${lesson.lesson_id}`
+                            );
+                          }
                         }
                       }}
                       className={`
