@@ -1,5 +1,5 @@
 
-import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import {
   ChevronLeft, ChevronRight, CheckCircle,
   Download, FileText, Volume2, Video,

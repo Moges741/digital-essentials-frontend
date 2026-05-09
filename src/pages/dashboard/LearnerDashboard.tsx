@@ -7,7 +7,7 @@ import {
 import { useMyEnrollments }  from '../../hooks/useEnrollment';
 import { useCourseProgress } from '../../hooks/useProgress';
 import { useAuthStore }      from '../../store/auth.store';
-import Card, { CardHeader, CardTitle } from '../../components/ui/Card';
+import Card, { CardHeader } from '../../components/ui/Card';
 import Button                from '../../components/ui/Button';
 import ProgressBar           from '../../components/ui/ProgressBar';
 import EmptyState            from '../../components/ui/EmptyState';

@@ -1,7 +1,7 @@
 
 import { useNavigate }       from 'react-router-dom';
 import {
-  Plus, BookOpen, Users,
+  Plus, BookOpen,
   Eye, Globe, EyeOff,
 } from 'lucide-react';
 import { useCourses }        from '../../hooks/useCourses';
