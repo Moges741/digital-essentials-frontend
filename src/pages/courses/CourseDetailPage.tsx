@@ -18,7 +18,169 @@ import { ConfirmModal }                from '../../components/ui/Modal';
 import { ROLES }                       from '../../utils/constants';
 import { formatDate }                  from '../../utils/format';
 import { useState }                    from 'react';
+// Add these imports at the top of CourseDetailPage.tsx
+import { ChevronDown, ChevronUp } from 'lucide-react';
+import { useMaterials }          from '../../hooks/useMaterials';
+import LessonMaterials           from '../../components/lesson/LessonMaterials';
+import LessonMaterialUpload      from '../../components/lesson/LessonMaterialUpload';
 
+const LessonItem = ({
+  lesson,
+  index,
+  courseId,
+  isEnrolled,
+  canManage,
+}: {
+  lesson:     { lesson_id: number; title: string; lesson_order: number };
+  index:      number;
+  courseId:   number;
+  isEnrolled: boolean;
+  canManage:  boolean;
+}) => {
+  const navigate              = useNavigate();
+  const [expanded, setExpanded] = useState(false);
+  const [showUpload, setShowUpload] = useState(false);
+
+  // Only fetch materials when expanded and user can manage
+  const {
+    data: allMaterials,
+  } = useMaterials(courseId);
+
+  // Filter materials for this specific lesson
+  const lessonMaterials = (allMaterials ?? []).filter(
+    (m) => m.lesson_id === lesson.lesson_id
+  );
+
+  const isAccessible = isEnrolled || canManage;
+
+  return (
+    <div className="rounded-xl border border-gray-200 overflow-hidden">
+
+      {/* Lesson row */}
+      <div
+        className={`
+          flex items-center gap-3 p-4
+          transition-all duration-150
+          ${isAccessible
+            ? 'hover:bg-gray-50 cursor-pointer'
+            : 'bg-gray-50 opacity-60 cursor-not-allowed'
+          }
+        `}
+        onClick={() => {
+          if (isAccessible && !canManage) {
+            navigate(
+              `/courses/${courseId}/lessons/${lesson.lesson_id}`
+            );
+          }
+        }}
+      >
+        {/* Number */}
+        <div className={`
+          w-7 h-7 rounded-full flex items-center justify-center
+          text-xs font-bold flex-shrink-0
+          ${isAccessible
+            ? 'bg-primary-100 text-primary-700'
+            : 'bg-gray-200 text-gray-400'
+          }
+        `}>
+          {index + 1}
+        </div>
+
+        {/* Title */}
+        <span className={`
+          text-sm font-medium flex-1
+          ${isAccessible ? 'text-gray-800' : 'text-gray-400'}
+        `}>
+          {lesson.title}
+        </span>
+
+        {/* Mentor actions */}
+        {canManage ? (
+          <div className="flex items-center gap-2"
+               onClick={(e) => e.stopPropagation()}>
+
+            {/* Material count badge */}
+            {lessonMaterials.length > 0 && (
+              <span className="text-xs text-gray-400">
+                {lessonMaterials.length} file
+                {lessonMaterials.length !== 1 ? 's' : ''}
+              </span>
+            )}
+
+            {/* View lesson */}
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() =>
+                navigate(
+                  `/courses/${courseId}/lessons/${lesson.lesson_id}`
+                )
+              }
+            >
+              <Play size={13} />
+            </Button>
+
+            {/* Expand materials */}
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setExpanded((v) => !v)}
+              leftIcon={
+                expanded
+                  ? <ChevronUp size={14} />
+                  : <ChevronDown size={14} />
+              }
+            >
+              Materials
+            </Button>
+          </div>
+        ) : (
+          isAccessible
+            ? <Play size={14} className="text-primary-500" />
+            : <Lock size={14} className="text-gray-300" />
+        )}
+      </div>
+
+      {/* Expandable materials section — mentor only */}
+      {canManage && expanded && (
+        <div className="border-t border-gray-100 p-4
+                          bg-gray-50 flex flex-col gap-3">
+
+          {/* Existing materials */}
+          {lessonMaterials.length > 0 ? (
+            <LessonMaterials
+              materials={lessonMaterials}
+              course_id={courseId}
+            />
+          ) : (
+            <p className="text-xs text-gray-400 text-center py-2">
+              No materials uploaded for this lesson yet
+            </p>
+          )}
+
+          {/* Upload toggle */}
+          {showUpload ? (
+            <LessonMaterialUpload
+              course_id={courseId}
+              lesson_id={lesson.lesson_id}
+              onDone={() => setShowUpload(false)}
+            />
+          ) : (
+            <Button
+              variant="secondary"
+              size="sm"
+              leftIcon={<Plus size={14} />}
+              onClick={() => setShowUpload(true)}
+            >
+              Add Material
+            </Button>
+          )}
+        </div>
+      )}
+
+    </div>
+  );
+};
 const CourseDetailPage = () => {
   const { course_id }           = useParams<{ course_id: string }>();
   const navigate                = useNavigate();
@@ -168,75 +330,30 @@ const CourseDetailPage = () => {
               )}
             </div>
 
-            {lessons.length === 0 ? (
-              <EmptyState
-                title="No lessons yet"
-                description={
-                  canManage
-                    ? 'Add lessons to this course to get started'
-                    : 'Lessons will appear here soon'
-                }
-              />
-            ) : (
-              <div className="flex flex-col gap-2">
-                {lessons.map((lesson, index) => {
-                  const isAccessible = isEnrolled || canManage;
-
-                  return (
-                    <div
-                      key={lesson.lesson_id}
-                      onClick={() => {
-                        if (isAccessible) {
-                          if (canManage) {
-                            navigate(
-                              `/mentor/courses/${courseId}/lessons/${lesson.lesson_id}/edit`
-                            );
-                          } else {
-                            navigate(
-                              `/courses/${courseId}/lessons/${lesson.lesson_id}`
-                            );
-                          }
-                        }
-                      }}
-                      className={`
-                        flex items-center gap-3 p-4 rounded-xl border
-                        transition-all duration-150
-                        ${isAccessible
-                          ? 'border-gray-200 hover:border-primary-300 hover:bg-primary-50 cursor-pointer'
-                          : 'border-gray-100 bg-gray-50 cursor-not-allowed opacity-60'
-                        }
-                      `}
-                    >
-                      {/* Lesson number */}
-                      <div className={`
-                        w-7 h-7 rounded-full flex items-center justify-center
-                        text-xs font-bold flex-shrink-0
-                        ${isAccessible
-                          ? 'bg-primary-100 text-primary-700'
-                          : 'bg-gray-200 text-gray-400'
-                        }
-                      `}>
-                        {index + 1}
-                      </div>
-
-                      {/* Title */}
-                      <span className={`
-                        text-sm font-medium flex-1
-                        ${isAccessible ? 'text-gray-800' : 'text-gray-400'}
-                      `}>
-                        {lesson.title}
-                      </span>
-
-                      {/* Icon */}
-                      {isAccessible
-                        ? <Play size={14} className="text-primary-500" />
-                        : <Lock size={14} className="text-gray-300" />
-                      }
-                    </div>
-                  );
-                })}
-              </div>
-            )}
+        {/* Lesson list */}
+{lessons.length === 0 ? (
+  <EmptyState
+    title="No lessons yet"
+    description={
+      canManage
+        ? 'Add lessons to this course to get started'
+        : 'Lessons will appear here soon'
+    }
+  />
+) : (
+  <div className="flex flex-col gap-3">
+    {lessons.map((lesson, index) => (
+      <LessonItem
+        key={lesson.lesson_id}
+        lesson={lesson}
+        index={index}
+        courseId={courseId}
+        isEnrolled={isEnrolled}
+        canManage={canManage}
+      />
+    ))}
+  </div>
+)}
           </div>
 
         </div>

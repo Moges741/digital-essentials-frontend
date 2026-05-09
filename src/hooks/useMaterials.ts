@@ -1,6 +1,3 @@
-// src/hooks/useMaterials.ts
-// React Query hooks for material operations
-// Upload invalidates both course and material queries
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import toast            from 'react-hot-toast';

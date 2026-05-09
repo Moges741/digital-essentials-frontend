@@ -8,7 +8,7 @@ export const materialApi = {
   // GET /api/courses/:course_id/materials
   // Lists all materials for a course
   list: async (course_id: number): Promise<Material[]> => {
-    const res = await apiClient.get
+    const res = await apiClient.get<
       ApiResponse<{ materials: Material[] }>
     >(`/courses/${course_id}/materials`);
     return res.data.data.materials;
@@ -21,7 +21,7 @@ export const materialApi = {
     course_id: number,
     formData:  FormData
   ): Promise<Material> => {
-    const res = await apiClient.post
+    const res = await apiClient.post<
       ApiResponse<{ material: Material }>
     >(
       `/courses/${course_id}/materials`,

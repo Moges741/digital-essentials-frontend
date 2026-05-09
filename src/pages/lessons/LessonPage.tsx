@@ -16,7 +16,10 @@ import ProgressBar           from '../../components/ui/ProgressBar';
 import { PageSpinner }       from '../../components/ui/Spinner';
 import EmptyState            from '../../components/ui/EmptyState';
 import type { OfflineMaterial }   from '../../types/lesson.types';
-
+import { useAuthStore }        from '../../store/auth.store';
+import LessonMaterialUpload    from '../../components/lesson/LessonMaterialUpload';
+import LessonMaterials         from '../../components/lesson/LessonMaterials';
+import { ROLES }               from '../../utils/constants';
 // ── Material icon by type ─────────────────────────────────────
 const MaterialIcon = ({ type }: { type: string }) => {
   const icons: Record<string, React.ReactNode> = {
@@ -52,6 +55,7 @@ const LessonPage = () => {
   const { data: progress, isLoading: progressLoading } = useCourseProgress(courseId);
   const { isEnrolled }                                 = useIsEnrolled(courseId);
   const { mutate: markComplete, isPending: marking }   = useMarkComplete(courseId);
+  const user = useAuthStore((s) => s.user);
 
   // Find current lesson's position in list
   const currentIndex  = lessons?.findIndex((l) => l.lesson_id === lessonId) ?? -1;
@@ -193,7 +197,43 @@ const LessonPage = () => {
                     {typeLabel[material.file_type] ?? material.file_type}
                   </p>
                 </div>
+{/* Materials section */}
+<div className="mb-8">
+  <div className="flex items-center justify-between mb-3">
+    <h2 className="text-base font-semibold text-gray-900">
+      Lesson Materials
+    </h2>
+    {/* Material count */}
+    {materials.length > 0 && (
+      <span className="text-xs text-gray-400">
+        {materials.length} file{materials.length !== 1 ? 's' : ''}
+      </span>
+    )}
+  </div>
 
+  {/* Existing materials — visible to everyone */}
+  {materials.length > 0 ? (
+    <LessonMaterials
+      materials={materials as unknown as any}
+      course_id={courseId}
+    />
+  ) : (
+    <p className="text-sm text-gray-400 italic">
+      No materials for this lesson yet.
+    </p>
+  )}
+
+  {/* Upload section — mentor and admin only */}
+  {(user?.role === ROLES.MENTOR ||
+    user?.role === ROLES.ADMINISTRATOR) && (
+    <div className="mt-4">
+      <LessonMaterialUpload
+        course_id={courseId}
+        lesson_id={lessonId}
+      />
+    </div>
+  )}
+</div>
                 {/* Download/View button */}
                 {material.is_downloadable ? (
                   <a
