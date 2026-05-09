@@ -15,7 +15,7 @@ import Card                  from '../../components/ui/Card';
 import ProgressBar           from '../../components/ui/ProgressBar';
 import { PageSpinner }       from '../../components/ui/Spinner';
 import EmptyState            from '../../components/ui/EmptyState';
-import { OfflineMaterial }   from '../../types/lesson.types';
+import type { OfflineMaterial }   from '../../types/lesson.types';
 
 // ── Material icon by type ─────────────────────────────────────
 const MaterialIcon = ({ type }: { type: string }) => {
@@ -51,7 +51,7 @@ const LessonPage = () => {
   const { data: lessons,  isLoading: lessonsLoading } = useLessons(courseId);
   const { data: progress, isLoading: progressLoading } = useCourseProgress(courseId);
   const { isEnrolled }                                 = useIsEnrolled(courseId);
-//   const { mutate: markComplete, isPending: marking }   = useMarkComplete(courseId);
+  const { mutate: markComplete, isPending: marking }   = useMarkComplete(courseId);
 
   // Find current lesson's position in list
   const currentIndex  = lessons?.findIndex((l) => l.lesson_id === lessonId) ?? -1;
@@ -196,7 +196,7 @@ const LessonPage = () => {
 
                 {/* Download/View button */}
                 {material.is_downloadable ? (
-                  
+                  <a
                     href={material.file_url}
                     target="_blank"
                     rel="noopener noreferrer"
@@ -212,7 +212,7 @@ const LessonPage = () => {
                     </Button>
                   </a>
                 ) : (
-                  
+                  <a
                     href={material.file_url}
                     target="_blank"
                     rel="noopener noreferrer"
