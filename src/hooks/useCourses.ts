@@ -1,6 +1,3 @@
-// src/hooks/useCourses.ts
-// React Query hooks for all course operations
-// Components call these hooks — never call courseApi directly
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';

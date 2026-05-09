@@ -18,12 +18,16 @@ import { ConfirmModal }                from '../../components/ui/Modal';
 import { ROLES }                       from '../../utils/constants';
 import { formatDate }                  from '../../utils/format';
 import { useState }                    from 'react';
-// Add these imports at the top of CourseDetailPage.tsx
 import { ChevronDown, ChevronUp } from 'lucide-react';
 import { useMaterials }          from '../../hooks/useMaterials';
 import LessonMaterials           from '../../components/lesson/LessonMaterials';
 import LessonMaterialUpload      from '../../components/lesson/LessonMaterialUpload';
-
+import { useForm }          from 'react-hook-form';
+import { zodResolver }      from '@hookform/resolvers/zod';
+import { z }                from 'zod';
+import { Star }             from 'lucide-react';
+import { useMyFeedback, useSubmitFeedback } from '../../hooks/useFeedback';
+import { Textarea }         from '../../components/ui/Input';
 const LessonItem = ({
   lesson,
   index,
@@ -179,6 +183,166 @@ const LessonItem = ({
       )}
 
     </div>
+  );
+};
+// ── Feedback Section ──────────────────────────────────────────
+// Embedded inside CourseDetailPage
+// Only shown to enrolled learners
+// One submission per enrollment
+
+const feedbackSchema = z.object({
+  rating:   z.number().min(1, 'Please select a rating').max(5),
+  comments: z.string().optional(),
+});
+
+type FeedbackFormData = z.infer<typeof feedbackSchema>;
+
+const StarRating = ({
+  value,
+  onChange,
+}: {
+  value:    number;
+  onChange: (v: number) => void;
+}) => {
+  const [hovered, setHovered] = useState(0);
+
+  return (
+    <div className="flex items-center gap-1">
+      {[1, 2, 3, 4, 5].map((star) => (
+        <button
+          key={star}
+          type="button"
+          onClick={() => onChange(star)}
+          onMouseEnter={() => setHovered(star)}
+          onMouseLeave={() => setHovered(0)}
+          className="transition-transform hover:scale-110"
+        >
+          <Star
+            size={28}
+            className={`transition-colors ${
+              star <= (hovered || value)
+                ? 'fill-amber-400 text-amber-400'
+                : 'text-gray-300'
+            }`}
+          />
+        </button>
+      ))}
+      {value > 0 && (
+        <span className="ml-2 text-sm text-gray-500">
+          {['', 'Poor', 'Fair', 'Good', 'Very Good', 'Excellent'][value]}
+        </span>
+      )}
+    </div>
+  );
+};
+
+const FeedbackSection = ({
+  
+  enrollmentId,
+}: {
+  courseId:     number;
+  enrollmentId: number;
+}) => {
+  const { data: myFeedback } = useMyFeedback();
+  const { mutate: submit, isPending } = useSubmitFeedback();
+
+  // Check if learner already submitted feedback for this enrollment
+  const existingFeedback = myFeedback?.find(
+    (f) => f.enrollment_id === enrollmentId
+  );
+
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    watch,
+    formState: { errors },
+  } = useForm<FeedbackFormData>({
+    resolver:      zodResolver(feedbackSchema),
+    defaultValues: { rating: 0 },
+  });
+
+  const rating = watch('rating');
+
+  const onSubmit = (data: FeedbackFormData) => {
+    submit({
+      enrollment_id: enrollmentId,
+      rating:        data.rating,
+      comments:      data.comments,
+    });
+  };
+
+  // Already submitted
+  if (existingFeedback) {
+    return (
+      <Card padding="md">
+        <h2 className="text-base font-semibold text-gray-900 mb-3">
+          Your Feedback
+        </h2>
+        <div className="flex items-center gap-2 mb-2">
+          {[1, 2, 3, 4, 5].map((star) => (
+            <Star
+              key={star}
+              size={20}
+              className={
+                star <= existingFeedback.rating
+                  ? 'fill-amber-400 text-amber-400'
+                  : 'text-gray-200'
+              }
+            />
+          ))}
+          <span className="text-sm text-gray-500 ml-1">
+            {existingFeedback.rating}/5
+          </span>
+        </div>
+        {existingFeedback.comments && (
+          <p className="text-sm text-gray-600 italic">
+            "{existingFeedback.comments}"
+          </p>
+        )}
+        <p className="text-xs text-gray-400 mt-2">
+          Submitted {formatDate(existingFeedback.submitted_at)}
+        </p>
+      </Card>
+    );
+  }
+
+  return (
+    <Card padding="md">
+      <h2 className="text-base font-semibold text-gray-900 mb-4">
+        Leave Feedback
+      </h2>
+      <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
+
+        <div className="flex flex-col gap-1.5">
+          <label className="text-sm font-medium text-gray-700">
+            Rating <span className="text-red-500">*</span>
+          </label>
+          <StarRating
+            value={rating}
+            onChange={(v) => setValue('rating', v, { shouldValidate: true })}
+          />
+          {errors.rating && (
+            <p className="text-xs text-red-600">⚠ {errors.rating.message}</p>
+          )}
+        </div>
+
+        <Textarea
+          label="Comments (optional)"
+          placeholder="Share your experience with this course..."
+          {...register('comments')}
+        />
+
+        <Button
+          type="submit"
+          isLoading={isPending}
+          size="md"
+        >
+          Submit Feedback
+        </Button>
+
+      </form>
+    </Card>
   );
 };
 const CourseDetailPage = () => {
@@ -353,6 +517,12 @@ const CourseDetailPage = () => {
       />
     ))}
   </div>
+)}
+{isEnrolled && enrollment && user?.role === ROLES.LEARNER && (
+  <FeedbackSection
+    courseId={courseId}
+    enrollmentId={enrollment.enrollment_id}
+  />
 )}
           </div>
 
