@@ -72,10 +72,7 @@ const App = () => {
 
       {/* ── Protected Routes ───────────────────────── */}
       <Route element={<ProtectedRoute />}>
-
-        <Route path="/chat" element={
-          <AuthLayout><ChatPage /></AuthLayout>
-        } />
+<Route path="/chat" element={<ChatPage />} />
 
         {/* Learner */}
         <Route element={<RoleGuard allowedRoles={['learner']} />}>

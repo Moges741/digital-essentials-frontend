@@ -22,7 +22,7 @@ import { formatDateTime }    from '../../utils/format';
 
 const submitSchema = z.object({
   score: z
-    .number({ invalid_type_error: 'Score must be a number' })
+    .number({ error: 'Score must be a number' })
     .min(0,   'Score cannot be less than 0')
     .max(100, 'Score cannot exceed 100')
     .optional(),
@@ -98,17 +98,21 @@ const ExercisePage = () => {
     (s) => s.exercise_id === exerciseId
   );
 
+  // Form setup
   const {
-    register,
     handleSubmit,
+    register,
     formState: { errors },
   } = useForm<SubmitFormData>({
     resolver: zodResolver(submitSchema),
   });
 
   const onSubmit = (data: SubmitFormData) => {
-    submitExercise({ score: data.score });
+    submitExercise({
+      score: data.score ?? undefined,
+    });
   };
+
 
   const isLoading = exerciseLoading || submissionsLoading;
 
@@ -169,7 +173,7 @@ const ExercisePage = () => {
               Download and complete this worksheet
             </p>
           </div>
-          
+          <a
             href={exercise.file_url}
             target="_blank"
             rel="noopener noreferrer"

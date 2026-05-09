@@ -82,7 +82,7 @@ const CertificatesPage = () => {
                 <div className="flex gap-2 pt-1">
                   {cert.certificate_url ? (
                     <>
-                      
+                      <a
                         href={cert.certificate_url}
                         target="_blank"
                         rel="noopener noreferrer"
@@ -97,7 +97,7 @@ const CertificatesPage = () => {
                           View
                         </Button>
                       </a>
-                      
+                      <a
                         href={cert.certificate_url}
                         download
                         className="flex-1"
