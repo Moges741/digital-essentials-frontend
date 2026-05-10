@@ -9,12 +9,13 @@ import type { ApiResponse } from '../types/auth.types';
 
 export const feedbackApi = {
 
-  // POST /api/feedback
+  // POST /api/feedback/enrollments/:enrollment_id
   // Learner submits feedback for an enrollment
   create: async (body: CreateFeedbackBody): Promise<Feedback> => {
+    const { enrollment_id, ...rest } = body;
     const res = await apiClient.post<ApiResponse<{ feedback: Feedback }>>(
-      '/feedback',
-      body
+      `/feedback/enrollments/${enrollment_id}`,
+      rest
     );
     return res.data.data.feedback;
   },
@@ -28,24 +29,24 @@ export const feedbackApi = {
     return res.data.data.feedback;
   },
 
-  // GET /api/feedback/course/:course_id
+  // GET /api/feedback/courses/:course_id
   // Mentor/admin views all feedback for a course
   getByCourse: async (
     course_id: number
   ): Promise<FeedbackWithDetails[]> => {
     const res = await apiClient.get<ApiResponse<{ feedback: FeedbackWithDetails[] }>>(
-      `/feedback/course/${course_id}`
+      `/feedback/courses/${course_id}`
     );
     return res.data.data.feedback;
   },
 
-  // PATCH /api/feedback/:feedback_id
+  // PUT /api/feedback/:feedback_id
   // Learner updates their own feedback
   update: async (
     feedback_id: number,
     body:        UpdateFeedbackBody
   ): Promise<Feedback> => {
-    const res = await apiClient.patch<ApiResponse<{ feedback: Feedback }>>(
+    const res = await apiClient.put<ApiResponse<{ feedback: Feedback }>>(
       `/feedback/${feedback_id}`,
       body
     );

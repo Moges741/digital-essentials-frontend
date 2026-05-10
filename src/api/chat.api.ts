@@ -9,12 +9,12 @@ import type { ApiResponse } from '../types/auth.types';
 
 export const chatApi = {
 
-  // POST /api/chat
+  // POST /api/chat/send
   // Send message to Groq AI, get response
   // Returns both the user message and AI response
   send: async (body: SendMessageBody): Promise<ChatResponse> => {
     const res = await apiClient.post<ApiResponse<ChatResponse>>(
-      '/chat',
+      '/chat/send',
       body
     );
     return res.data.data;

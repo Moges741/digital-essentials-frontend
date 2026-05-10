@@ -518,6 +518,7 @@ const CourseDetailPage = () => {
     ))}
   </div>
 )}
+<div className='pt-5'></div>
 {isEnrolled && enrollment && user?.role === ROLES.LEARNER && (
   <FeedbackSection
     courseId={courseId}

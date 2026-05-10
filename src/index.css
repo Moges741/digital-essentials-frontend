@@ -14,3 +14,20 @@ body {
   font-family: 'Inter', sans-serif;
   @apply bg-gray-50 text-gray-900;
 }
+html {
+  scroll-behavior: smooth;
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  @apply bg-gray-100;
+}
+::-webkit-scrollbar-thumb {
+  @apply bg-gray-300 rounded-full;
+}
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-gray-400;
+}

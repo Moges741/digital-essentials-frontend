@@ -12,6 +12,7 @@ export interface SendMessageBody {
 }
 
 export interface ChatResponse {
-  userMessage: ChatMessage;
-  aiMessage:   ChatMessage;
+  user_message: ChatMessage;
+  ai_message: ChatMessage;
+  session_id: string;
 }
