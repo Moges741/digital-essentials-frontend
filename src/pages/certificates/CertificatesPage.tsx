@@ -80,8 +80,9 @@ const CertificatesPage = () => {
 
                 {/* Actions */}
                 <div className="flex gap-2 pt-1">
-                  {cert.certificate_url ? (
+                  {cert.certificate_url && cert.certificate_url !== '' ? (
                     <>
+                      {/* View in new tab */}
                       <a
                         href={cert.certificate_url}
                         target="_blank"
@@ -97,9 +98,11 @@ const CertificatesPage = () => {
                           View
                         </Button>
                       </a>
+
+                      {/* Force download via backend endpoint */}
                       <a
-                        href={cert.certificate_url}
-                        download
+                        href={`${import.meta.env.VITE_API_BASE_URL}/certificates/${cert.certificate_id}/download`}
+                        download={`Certificate_${cert.course_title.replace(/\s+/g, '_')}.pdf`}
                         className="flex-1"
                       >
                         <Button
@@ -113,11 +116,13 @@ const CertificatesPage = () => {
                       </a>
                     </>
                   ) : (
-                    <p className="text-xs text-gray-400 italic">
-                      Certificate file not available yet
-                    </p>
+                    <div className="flex items-center gap-2 text-xs text-amber-600 bg-amber-50 rounded-lg px-3 py-2 w-full">
+                      <span className="animate-pulse">⏳</span>
+                      Generating your certificate...
+                    </div>
                   )}
                 </div>
+
 
               </div>
             </Card>

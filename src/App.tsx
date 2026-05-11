@@ -35,6 +35,8 @@ import ExercisePage      from './pages/exercises/ExercisePage';
 // Mentor pages
 import MentorDashboard  from './pages/dashboard/MentorDashboard';
 import CreateCoursePage from './pages/courses/CreateCoursePage';
+import CreateLessonPage from './pages/lessons/CreateLessonPage';
+import EditLessonPage   from './pages/lessons/EditLessonPage';
 
 // Admin pages
 import AdminDashboard from './pages/dashboard/AdminDashboard';
@@ -122,6 +124,12 @@ const App = () => {
           } />
           <Route path="/mentor/courses/create" element={
             <AuthLayout><CreateCoursePage /></AuthLayout>
+          } />
+          <Route path="/mentor/courses/:course_id/lessons/create" element={
+            <AuthLayout><CreateLessonPage /></AuthLayout>
+          } />
+          <Route path="/mentor/courses/:course_id/lessons/:lesson_id/edit" element={
+            <AuthLayout><EditLessonPage /></AuthLayout>
           } />
         </Route>
 

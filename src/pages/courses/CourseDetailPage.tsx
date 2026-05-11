@@ -3,7 +3,7 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import {
   Clock, User, BookOpen, ChevronRight,
   CheckCircle, Lock, Play, Globe, EyeOff,
-  Plus, Trash2,
+  Plus, Trash2, Edit,
 } from 'lucide-react';
 import { useCourse }                   from '../../hooks/useCourses';
 import { usePublishCourse, useDeleteCourse } from '../../hooks/useCourses';
@@ -122,6 +122,19 @@ const LessonItem = ({
               }
             >
               <Play size={13} />
+            </Button>
+
+            {/* Edit lesson */}
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() =>
+                navigate(
+                  `/mentor/courses/${courseId}/lessons/${lesson.lesson_id}/edit`
+                )
+              }
+            >
+              <Edit size={13} />
             </Button>
 
             {/* Expand materials */}
