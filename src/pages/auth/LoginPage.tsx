@@ -1,4 +1,4 @@
-import { useEffect, useState }       from 'react';
+import { useEffect }       from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useForm }         from 'react-hook-form';
 import { zodResolver }     from '@hookform/resolvers/zod';
@@ -11,7 +11,6 @@ import Input             from '../../components/ui/Input';
 import Button            from '../../components/ui/Button';
 import { getDashboardByRole } from '../../utils/constants';
 import { useGoogleLogin } from '../../hooks/useGoogleAuth';  // New hook
-import { useResendVerification } from '../../hooks/useEmailVerification';
 
 // ── Zod validation schema ─────────────────────────────────────
 const loginSchema = z.object({
@@ -26,12 +25,6 @@ const LoginPage = () => {
   const { isAuthenticated, user }    = useAuthStore();
   const navigate                     = useNavigate();
   const { loginWithGoogle } = useGoogleLogin();
-const { mutate: resendVerification, isPending: resendPending } = useResendVerification();
-
-
-
-  const [showResend, setShowResend] = useState(false);
-const [userEmail, setUserEmail] = useState('');
 
   // If already logged in → redirect to correct dashboard
   useEffect(() => {
@@ -49,18 +42,8 @@ const [userEmail, setUserEmail] = useState('');
   });
 
   const onSubmit = (data: LoginFormData) => {
-  login(data, {
-    onError: (error: any) => {
-      const message = error.response?.data?.message;
-      if (message === 'Please verify your email before logging in') {
-        // Show resend UI
-        setShowResend(true);
-        setUserEmail(data.email);
-      }
-    },
-  });
-};
-
+    login(data);
+  };
 
   return (
     <div className="min-h-[calc(100vh-64px)] flex items-center justify-center px-4 py-12 bg-gray-50">
@@ -139,21 +122,6 @@ const [userEmail, setUserEmail] = useState('');
             </Button>
 
           </form>
-{showResend && (
-  <div className="mt-4 p-4 bg-yellow-50 border border-yellow-200 rounded-xl">
-    <p className="text-sm text-yellow-700 mb-2">
-      Please verify your email before logging in.
-    </p>
-    <Button
-      onClick={() => resendVerification(userEmail)}
-      isLoading={resendPending}
-      size="sm"
-      variant="secondary"
-    >
-      Resend Verification Email
-    </Button>
-  </div>
-)}
           {/* Footer link */}
           <p className="text-center text-sm text-gray-500 mt-6">
             Don't have an account?{' '}
