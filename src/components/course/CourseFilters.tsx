@@ -5,22 +5,29 @@ import Input                   from '../ui/Input';
 // import Button                  from '../ui/Button';
 
 interface CourseFiltersProps {
-  onSearch:  (search: string) => void;
-  isLoading: boolean;
+  search:     string;
+  onSearch:   (search: string) => void;
+  isLoading:  boolean;
 }
 
-const CourseFilters = ({ onSearch, isLoading }: CourseFiltersProps) => {
-  const [value, setValue] = useState('');
+const CourseFilters = ({ search, onSearch, isLoading }: CourseFiltersProps) => {
+  const [value, setValue] = useState(search);
 
-  // Debounce search — wait 400ms after user stops typing
-  // Prevents API call on every keystroke
+  // Sync local value with prop
+  useEffect(() => {
+    setValue(search);
+  }, [search]);
+
+  // Debounce search — wait 300ms after user stops typing
   useEffect(() => {
     const timer = setTimeout(() => {
-      onSearch(value.trim());
-    }, 400);
+      if (value !== search) {
+        onSearch(value.trim());
+      }
+    }, 300);
 
     return () => clearTimeout(timer);
-  }, [value, onSearch]);
+  }, [value, search, onSearch]);
 
   const handleClear = () => {
     setValue('');

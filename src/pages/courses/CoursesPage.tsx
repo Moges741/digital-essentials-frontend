@@ -1,7 +1,7 @@
 
 
-import { useState, useCallback } from 'react';
-import { useNavigate }           from 'react-router-dom';
+import { useState, useCallback, useEffect } from 'react';
+import { useNavigate, useSearchParams }    from 'react-router-dom';
 import { BookOpen, Plus }        from 'lucide-react';
 import { useCourses }            from '../../hooks/useCourses';
 import { useAuthStore }          from '../../store/auth.store';
@@ -15,11 +15,24 @@ import { ROLES }                from '../../utils/constants';
 const LIMIT = 12;  // courses per page
 
 const CoursesPage = () => {
-  const navigate = useNavigate();
-  const user     = useAuthStore((state) => state.user);
+  const navigate     = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const user         = useAuthStore((state) => state.user);
 
-  const [search, setSearch] = useState('');
+  // Get search from URL params, default to empty string
+  const [search, setSearch] = useState(searchParams.get('search') || '');
   const [page,   setPage]   = useState(1);
+
+  // Update URL when search changes
+  useEffect(() => {
+    const params = new URLSearchParams(searchParams);
+    if (search) {
+      params.set('search', search);
+    } else {
+      params.delete('search');
+    }
+    setSearchParams(params, { replace: true });
+  }, [search, searchParams, setSearchParams]);
 
   const { data, isLoading, isError, refetch } = useCourses({
     search: search || undefined,
@@ -85,7 +98,11 @@ const CoursesPage = () => {
 
       {/* Search */}
       <div className="mb-6">
-        <CourseFilters onSearch={handleSearch} isLoading={isLoading} />
+        <CourseFilters
+          search={search}
+          onSearch={handleSearch}
+          isLoading={isLoading}
+        />
       </div>
 
       {/* Course grid */}
