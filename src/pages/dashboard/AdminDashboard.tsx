@@ -3,10 +3,10 @@ import { useNavigate }    from 'react-router-dom';
 import {
   Users, BookOpen, GraduationCap,
   Award, Shield, Search,
+  Edit, Eye, EyeOff,
 } from 'lucide-react';
-import { useQuery }       from '@tanstack/react-query';
-import apiClient          from '../../api/axios';
-import { useCourses }     from '../../hooks/useCourses';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { adminApi }       from '../../api/admin.api';
 import { useAuthStore }   from '../../store/auth.store';
 import Card, { CardHeader, CardTitle } from '../../components/ui/Card';
 import Badge, { RoleBadge } from '../../components/ui/Badge';
@@ -14,22 +14,23 @@ import Input              from '../../components/ui/Input';
 import Button             from '../../components/ui/Button';
 import EmptyState         from '../../components/ui/EmptyState';
 import { PageSpinner }    from '../../components/ui/Spinner';
+import Modal              from '../../components/ui/Modal';
 import { formatDate }     from '../../utils/format';
-import type { ApiResponse }    from '../../types/auth.types';
 import type { User }           from '../../types/auth.types';
 
 // ── Fetch all users (admin only) ──────────────────────────────
 const useAllUsers = () => {
   return useQuery({
     queryKey: ['admin', 'users'],
-    queryFn:  async () => {
-      const res = await apiClient.get<ApiResponse<{ users: User[] }>>(
-        '/admin/users'
-      );
-      return res.data.data.users;
-    },
-    // Gracefully handle if endpoint doesn't exist yet
-    retry: false,
+    queryFn: adminApi.getAllUsers,
+  });
+};
+
+// ── Fetch all courses (admin only) ────────────────────────────
+const useAllCourses = () => {
+  return useQuery({
+    queryKey: ['admin', 'courses'],
+    queryFn: adminApi.getAllCourses,
   });
 };
 
@@ -57,22 +58,53 @@ const StatCard = ({
 // ── Main Dashboard ────────────────────────────────────────────
 const AdminDashboard = () => {
   const navigate               = useNavigate();
+  const queryClient            = useQueryClient();
   const user                   = useAuthStore((s) => s.user);
   const [search, setSearch]    = useState('');
+  const [roleModal, setRoleModal] = useState<{
+    isOpen: boolean;
+    user?: User;
+  }>({ isOpen: false });
 
   const { data: users,   isLoading: usersLoading  } = useAllUsers();
-  const { data: courses, isLoading: coursesLoading } = useCourses({ limit: 100 });
+  const { data: courses, isLoading: coursesLoading } = useAllCourses();
+
+  // Mutations
+  const updateRoleMutation = useMutation({
+    mutationFn: ({ userId, role }: { userId: number; role: 'learner' | 'mentor' | 'administrator' }) =>
+      adminApi.updateUserRole(userId, role),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin', 'users'] });
+      setRoleModal({ isOpen: false });
+    },
+  });
+
+  const togglePublishMutation = useMutation({
+    mutationFn: (courseId: number) => adminApi.toggleCoursePublish(courseId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin', 'courses'] });
+      queryClient.invalidateQueries({ queryKey: ['courses'] });
+    },
+  });
 
   const isLoading = usersLoading || coursesLoading;
   if (isLoading) return <PageSpinner />;
 
   const allUsers   = users   ?? [];
-  const allCourses = courses?.courses ?? [];
+  const allCourses = courses ?? [];
 
   // Role counts
   const learners = allUsers.filter((u) => u.role === 'learner').length;
   const mentors  = allUsers.filter((u) => u.role === 'mentor').length;
   // const admins   = allUsers.filter((u) => u.role === 'administrator').length;
+
+  const handleRoleChange = (user: User, newRole: 'learner' | 'mentor' | 'administrator') => {
+    updateRoleMutation.mutate({ userId: user.user_id, role: newRole });
+  };
+
+  const handleTogglePublish = (courseId: number) => {
+    togglePublishMutation.mutate(courseId);
+  };
 
   // Filter users by search
   const filteredUsers = allUsers.filter((u) =>
@@ -152,23 +184,24 @@ const AdminDashboard = () => {
           <div className="overflow-x-auto">
 
             {/* Header row */}
-            <div className="grid grid-cols-4 gap-4 px-3 py-2
+            <div className="grid grid-cols-5 gap-4 px-3 py-2
                              bg-gray-50 rounded-lg mb-2 text-xs
                              font-semibold text-gray-500 uppercase
-                             tracking-wide min-w-[500px]">
+                             tracking-wide min-w-[600px]">
               <span>Name</span>
               <span>Email</span>
               <span>Role</span>
               <span>Joined</span>
+              <span>Actions</span>
             </div>
 
             {/* Data rows */}
             {filteredUsers.map((u) => (
               <div
                 key={u.user_id}
-                className="grid grid-cols-4 gap-4 px-3 py-3
+                className="grid grid-cols-5 gap-4 px-3 py-3
                              border-b border-gray-100 last:border-0
-                             items-center min-w-[500px]
+                             items-center min-w-[600px]
                              hover:bg-gray-50 rounded-lg
                              transition-colors"
               >
@@ -201,6 +234,15 @@ const AdminDashboard = () => {
                 <span className="text-xs text-gray-400">
                   {formatDate(u.created_at)}
                 </span>
+
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setRoleModal({ isOpen: true, user: u })}
+                  disabled={u.user_id === user?.user_id}
+                >
+                  <Edit size={14} />
+                </Button>
               </div>
             ))}
 
@@ -239,17 +281,96 @@ const AdminDashboard = () => {
                     by {course.creator_name}
                   </p>
                 </div>
-                <Badge
-                  variant={course.is_published ? 'success' : 'warning'}
-                  dot
-                >
-                  {course.is_published ? 'Published' : 'Draft'}
-                </Badge>
+                <div className="flex items-center gap-2">
+                  <Badge
+                    variant={course.is_published ? 'success' : 'warning'}
+                    dot
+                  >
+                    {course.is_published ? 'Published' : 'Draft'}
+                  </Badge>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleTogglePublish(course.course_id)}
+                    isLoading={togglePublishMutation.isPending}
+                  >
+                    {course.is_published ? (
+                      <EyeOff size={14} />
+                    ) : (
+                      <Eye size={14} />
+                    )}
+                  </Button>
+                </div>
               </div>
             ))}
           </div>
         )}
       </Card>
+
+      {/* Role Change Modal */}
+      <Modal
+        isOpen={roleModal.isOpen}
+        onClose={() => setRoleModal({ isOpen: false })}
+        title="Change User Role"
+        footer={
+          <div className="flex gap-2 justify-end">
+            <Button
+              variant="ghost"
+              onClick={() => setRoleModal({ isOpen: false })}
+            >
+              Cancel
+            </Button>
+          </div>
+        }
+      >
+        {roleModal.user && (
+          <div className="space-y-4">
+            <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+              <div className="w-10 h-10 rounded-full bg-primary-100 flex items-center justify-center">
+                <span className="text-sm font-bold text-primary-700">
+                  {roleModal.user.name.charAt(0).toUpperCase()}
+                </span>
+              </div>
+              <div>
+                <p className="font-medium text-gray-900">{roleModal.user.name}</p>
+                <p className="text-sm text-gray-500">{roleModal.user.email}</p>
+              </div>
+            </div>
+
+            <div>
+              <p className="text-sm text-gray-600 mb-3">Select new role:</p>
+              <div className="space-y-2">
+                {[
+                  { value: 'learner', label: 'Learner', description: 'Can enroll in courses and complete lessons' },
+                  { value: 'mentor', label: 'Mentor', description: 'Can create and manage courses' },
+                  { value: 'administrator', label: 'Administrator', description: 'Full system access and user management' },
+                ].map((role) => (
+                  <button
+                    key={role.value}
+                    onClick={() => handleRoleChange(roleModal.user!, role.value as any)}
+                    disabled={updateRoleMutation.isPending}
+                    className={`w-full text-left p-3 rounded-lg border transition-colors ${
+                      roleModal.user?.role === role.value
+                        ? 'border-primary-200 bg-primary-50'
+                        : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="font-medium text-gray-900">{role.label}</p>
+                        <p className="text-sm text-gray-500">{role.description}</p>
+                      </div>
+                      {roleModal.user?.role === role.value && (
+                        <div className="w-2 h-2 bg-primary-600 rounded-full"></div>
+                      )}
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+      </Modal>
 
     </div>
   );

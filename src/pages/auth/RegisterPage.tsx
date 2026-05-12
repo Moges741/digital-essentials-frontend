@@ -1,5 +1,5 @@
 
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { Link, useNavigate }   from 'react-router-dom';
 import { useForm }             from 'react-hook-form';
 import { zodResolver }         from '@hookform/resolvers/zod';
@@ -59,13 +59,19 @@ const roleOptions: RoleOption[] = [
     icon:        <Briefcase size={20} />,
     color:       'success',
   },
+  {
+    value:       'administrator',
+    label:       'Administrator',
+    description: 'I want to manage the platform',
+    icon:        <User size={20} />,
+    color:       'warning',
+  },
 ];
 
 const RegisterPage = () => {
   const { mutate: register, isPending } = useRegister();
   const { isAuthenticated, user }       = useAuthStore();
   const navigate                        = useNavigate();
-  const [selectedRole, setSelectedRole] = useState<Role>('learner');
 
   // If already logged in → redirect
   useEffect(() => {
@@ -88,7 +94,6 @@ const RegisterPage = () => {
   const watchedRole = watch('role');
 
   const handleRoleSelect = (role: Role) => {
-    setSelectedRole(role);
     setValue('role', role, { shouldValidate: true });
   };
 
@@ -122,7 +127,7 @@ const RegisterPage = () => {
               <label className="text-sm font-medium text-gray-700">
                 I am a <span className="text-red-500">*</span>
               </label>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-3 gap-3">
                 {roleOptions.map((option) => (
                   <button
                     key={option.value}
