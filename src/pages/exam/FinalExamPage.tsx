@@ -10,7 +10,7 @@ import { PageSpinner }  from '../../components/ui/Spinner';
 import EmptyState       from '../../components/ui/EmptyState';
 import type { ExamQuestion } from '../../types/exam.types';
 
-// ── Multiple choice question ──────────────────────────────────
+
 const MCQuestion = ({
   question,
   index,
