@@ -4,6 +4,7 @@ import {
   Clock, User, BookOpen, ChevronRight,
   CheckCircle, Lock, Play, Globe, EyeOff,
   Plus, Trash2, Edit,
+  ClipboardList,
 } from 'lucide-react';
 import { useCourse }                   from '../../hooks/useCourses';
 import { usePublishCourse, useDeleteCourse } from '../../hooks/useCourses';
@@ -488,6 +489,14 @@ const CourseDetailPage = () => {
                     Delete
                   </Button>
                 )}
+                {canManage && (
+  <Link to={`/mentor/courses/${courseId}/exam`}>
+    <Button variant="secondary" size="sm"
+            leftIcon={<ClipboardList size={14} />}>
+      Manage Exam
+    </Button>
+  </Link>
+)}
               </div>
             </Card>
           )}
@@ -572,6 +581,25 @@ const CourseDetailPage = () => {
                     >
                       Continue Learning
                     </Button>
+                  )}
+                  {(enrollment as { status?: string })?.status === 'exam_pending' && (
+                    <div className="flex flex-col gap-3">
+                      <div className="flex items-center gap-2 bg-amber-50
+                                       border border-amber-200 rounded-lg px-3 py-2">
+                        <ClipboardList size={16} className="text-amber-600" />
+                        <span className="text-sm font-medium text-amber-700">
+                          Final exam required
+                        </span>
+                      </div>
+                      <Button
+                        fullWidth
+                        size="lg"
+                        onClick={() => navigate(`/courses/${courseId}/exam`)}
+                        leftIcon={<ClipboardList size={16} />}
+                      >
+                        Take Final Exam
+                      </Button>
+                    </div>
                   )}
                 </>
               ) : user?.role === ROLES.LEARNER ? (

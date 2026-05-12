@@ -37,7 +37,10 @@ import MentorDashboard  from './pages/dashboard/MentorDashboard';
 import CreateCoursePage from './pages/courses/CreateCoursePage';
 import CreateLessonPage from './pages/lessons/CreateLessonPage';
 import EditLessonPage   from './pages/lessons/EditLessonPage';
-
+import ExamBuilderPage from './pages/exam/ExamBuilderPage';
+import FinalExamPage   from './pages/exam/FinalExamPage';
+import ExamResultPage  from './pages/exam/ExamResultPage';
+import ExamReviewPage  from './pages/exam/ExamReviewPage';
 // Admin pages
 import AdminDashboard from './pages/dashboard/AdminDashboard';
 
@@ -132,7 +135,25 @@ const App = () => {
             <AuthLayout><EditLessonPage /></AuthLayout>
           } />
         </Route>
+{/* Learner exam routes */}
+<Route
+  path="/courses/:course_id/exam"
+  element={<AuthLayout><FinalExamPage /></AuthLayout>}
+/>
+<Route
+  path="/courses/:course_id/exam/result"
+  element={<AuthLayout><ExamResultPage /></AuthLayout>}
+/>
 
+{/* Mentor exam routes */}
+<Route
+  path="/mentor/courses/:course_id/exam"
+  element={<AuthLayout><ExamBuilderPage /></AuthLayout>}
+/>
+<Route
+  path="/mentor/courses/:course_id/exam/review"
+  element={<AuthLayout><ExamReviewPage /></AuthLayout>}
+/>
         {/* ── Admin only ────────────────────────────────── */}
         <Route element={
           <RoleGuard allowedRoles={['administrator']} />
