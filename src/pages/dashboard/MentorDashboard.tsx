@@ -1,75 +1,128 @@
 
+import { useState }          from 'react';
 import { useNavigate }       from 'react-router-dom';
 import {
   Plus, BookOpen,
   Eye, Globe, EyeOff,
-  ClipboardList,
+  ClipboardList, MessageCircle,
+  ChevronDown, ChevronUp, Star,
 } from 'lucide-react';
 import { useCourses }        from '../../hooks/useCourses';
 import { usePublishCourse }  from '../../hooks/useCourses';
+import { useCourseFeedback } from '../../hooks/useFeedback';
 import { useAuthStore }      from '../../store/auth.store';
-import Card, { CardHeader, CardTitle } from '../../components/ui/Card';
+import Card from '../../components/ui/Card';
 import Button                from '../../components/ui/Button';
 import Badge, { StatusBadge } from '../../components/ui/Badge';
 import EmptyState            from '../../components/ui/EmptyState';
 import { PageSpinner }       from '../../components/ui/Spinner';
+import FeedbackList          from '../../components/course/FeedbackList';
 import { formatDate }        from '../../utils/format';
 import { ROLES }             from '../../utils/constants';
 
-// ── Course row in the table ───────────────────────────────────
+// ── Course row with feedback section ──────────────────────────
 const CourseRow = ({ course }: { course: any }) => {
+  const [expanded, setExpanded] = useState(false);
   const navigate = useNavigate();
   const { mutate: publish, isPending } = usePublishCourse(course.course_id);
+  const { data: feedback = [], isLoading: feedbackLoading } = useCourseFeedback(
+    expanded ? course.course_id : -1
+  );
+
+  const avgRating =
+    feedback.length > 0
+      ? Number((feedback.reduce((sum, f) => sum + f.rating, 0) / feedback.length).toFixed(1))
+      : 0;
 
   return (
-    <div className="flex items-center gap-4 py-4
-                     border-b border-gray-100 last:border-0">
+    <div className="border border-gray-100 rounded-lg overflow-hidden mb-4">
+      {/* Main row */}
+      <div className="flex items-center gap-4 p-4 bg-gray-50 hover:bg-gray-100 transition-colors">
 
-      {/* Title and meta */}
-      <div className="flex-1 min-w-0">
-        <p className="text-sm font-semibold text-gray-900 truncate">
-          {course.title}
-        </p>
-        <p className="text-xs text-gray-400 mt-0.5">
-          Created {formatDate(course.created_at)}
-        </p>
+        {/* Expand button */}
+        <button
+          onClick={() => setExpanded(!expanded)}
+          className="flex-shrink-0 p-1 rounded hover:bg-gray-200 transition-colors"
+          title={expanded ? 'Collapse feedback' : 'Expand feedback'}
+        >
+          {expanded ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
+        </button>
+
+        {/* Title and meta */}
+        <div className="flex-1 min-w-0">
+          <p className="text-sm font-semibold text-gray-900 truncate">
+            {course.title}
+          </p>
+          <div className="flex items-center gap-2 mt-0.5">
+            <p className="text-xs text-gray-500">
+              Created {formatDate(course.created_at)}
+            </p>
+            {feedback.length > 0 && (
+              <div className="flex items-center gap-1 text-xs text-gray-600">
+                <MessageCircle size={12} />
+                <span>{feedback.length} feedback</span>
+                {avgRating > 0 && (
+                  <>
+                    <span>•</span>
+                    <div className="flex items-center gap-0.5">
+                      <Star size={12} className="fill-yellow-400 text-yellow-400" />
+                      <span>{avgRating}/5</span>
+                    </div>
+                  </>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Status */}
+        <StatusBadge status={course.is_published ? 'published' : 'draft'} />
+
+        {/* Actions */}
+        <div className="flex items-center gap-2 flex-shrink-0">
+          <Button
+            variant="ghost"
+            size="sm"
+            leftIcon={<Eye size={13} />}
+            onClick={() => navigate(`/courses/${course.course_id}`)}
+          >
+            View
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            leftIcon={<ClipboardList size={13} />}
+            onClick={() => navigate(`/mentor/courses/${course.course_id}/exam/review`)}
+          >
+            Exam Review
+          </Button>
+          <Button
+            variant="secondary"
+            size="sm"
+            isLoading={isPending}
+            leftIcon={
+              course.is_published
+                ? <EyeOff size={13} />
+                : <Globe size={13} />
+            }
+            onClick={() => publish(!course.is_published)}
+          >
+            {course.is_published ? 'Unpublish' : 'Publish'}
+          </Button>
+        </div>
       </div>
 
-      {/* Status */}
-      <StatusBadge status={course.is_published ? 'published' : 'draft'} />
-
-      {/* Actions */}
-      <div className="flex items-center gap-2 flex-shrink-0">
-        <Button
-          variant="ghost"
-          size="sm"
-          leftIcon={<Eye size={13} />}
-          onClick={() => navigate(`/courses/${course.course_id}`)}
-        >
-          View
-        </Button>
-        <Button
-          variant="ghost"
-          size="sm"
-          leftIcon={<ClipboardList size={13} />}
-          onClick={() => navigate(`/mentor/courses/${course.course_id}/exam/review`)}
-        >
-          Exam Review
-        </Button>
-        <Button
-          variant="secondary"
-          size="sm"
-          isLoading={isPending}
-          leftIcon={
-            course.is_published
-              ? <EyeOff size={13} />
-              : <Globe size={13} />
-          }
-          onClick={() => publish(!course.is_published)}
-        >
-          {course.is_published ? 'Unpublish' : 'Publish'}
-        </Button>
-      </div>
+      {/* Expandable feedback section */}
+      {expanded && (
+        <div className="border-t border-gray-100 p-4 bg-white">
+          <div className="mb-3">
+            <h3 className="font-semibold text-gray-900 text-sm mb-2">
+              Course Feedback ({feedback.length})
+            </h3>
+          </div>
+          <FeedbackList feedback={feedback} isLoading={feedbackLoading} />
+        </div>
+      )}
     </div>
   );
 };
@@ -149,33 +202,35 @@ const MentorDashboard = () => {
         </Card>
       </div>
 
-      {/* Courses table */}
-      <Card padding="md">
-        <CardHeader>
-          <CardTitle>
+      {/* Courses section */}
+      <div>
+        <div className="mb-4 flex items-center justify-between">
+          <h2 className="text-lg font-semibold text-gray-900">
             {isAdmin ? 'All Courses' : 'My Courses'}
-          </CardTitle>
+          </h2>
           <Badge variant="neutral">{courses.length}</Badge>
-        </CardHeader>
+        </div>
 
         {courses.length === 0 ? (
-          <EmptyState
-            icon={<BookOpen size={24} />}
-            title="No courses yet"
-            description="Create your first course to get started."
-            action={{
-              label:   'Create Course',
-              onClick: () => navigate('/mentor/courses/create'),
-            }}
-          />
+          <Card padding="md">
+            <EmptyState
+              icon={<BookOpen size={24} />}
+              title="No courses yet"
+              description="Create your first course to get started."
+              action={{
+                label:   'Create Course',
+                onClick: () => navigate('/mentor/courses/create'),
+              }}
+            />
+          </Card>
         ) : (
-          <div>
+          <div className="space-y-0">
             {courses.map((course) => (
               <CourseRow key={course.course_id} course={course} />
             ))}
           </div>
         )}
-      </Card>
+      </div>
 
     </div>
   );

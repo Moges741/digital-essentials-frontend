@@ -7,8 +7,9 @@ export interface Feedback {
 }
 
 export interface FeedbackWithDetails extends Feedback {
-  learner_name:  string;
-  course_title:  string;
+  user_name:    string;
+  user_email:   string;
+  course_title: string;
 }
 
 export interface CreateFeedbackBody {
