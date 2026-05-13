@@ -3,6 +3,7 @@ import { useNavigate }       from 'react-router-dom';
 import {
   Plus, BookOpen,
   Eye, Globe, EyeOff,
+  ClipboardList,
 } from 'lucide-react';
 import { useCourses }        from '../../hooks/useCourses';
 import { usePublishCourse }  from '../../hooks/useCourses';
@@ -46,6 +47,14 @@ const CourseRow = ({ course }: { course: any }) => {
           onClick={() => navigate(`/courses/${course.course_id}`)}
         >
           View
+        </Button>
+        <Button
+          variant="ghost"
+          size="sm"
+          leftIcon={<ClipboardList size={13} />}
+          onClick={() => navigate(`/mentor/courses/${course.course_id}/exam/review`)}
+        >
+          Exam Review
         </Button>
         <Button
           variant="secondary"

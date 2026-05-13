@@ -40,7 +40,8 @@ import EditLessonPage   from './pages/lessons/EditLessonPage';
 import ExamBuilderPage from './pages/exam/ExamBuilderPage';
 import FinalExamPage   from './pages/exam/FinalExamPage';
 import ExamResultPage  from './pages/exam/ExamResultPage';
-import ExamReviewPage  from './pages/exam/ExamReviewPage';
+import ExamReviewPage    from './pages/exam/ExamReviewPage';
+import ExamSubmissionPage from './pages/exam/ExamSubmissionPage';
 // Admin pages
 import AdminDashboard from './pages/dashboard/AdminDashboard';
 
@@ -153,6 +154,10 @@ const App = () => {
 <Route
   path="/mentor/courses/:course_id/exam/review"
   element={<AuthLayout><ExamReviewPage /></AuthLayout>}
+/>
+<Route
+  path="/mentor/courses/:course_id/exam/submission/:submission_id"
+  element={<AuthLayout><ExamSubmissionPage /></AuthLayout>}
 />
         {/* ── Admin only ────────────────────────────────── */}
         <Route element={

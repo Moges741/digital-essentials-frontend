@@ -102,16 +102,30 @@ export const useGradeAnswer = (course_id: number) => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: ({
+      submission_id,
       answer_id,
       is_correct,
     }: {
-      answer_id:  number;
-      is_correct: boolean;
-    }) => examApi.gradeAnswer(course_id, answer_id, is_correct),
+      submission_id: number;
+      answer_id:     number;
+      is_correct:    boolean;
+    }) => examApi.gradeAnswer(course_id, submission_id, answer_id, is_correct),
     onSuccess: () => {
+      // Invalidate mentor's submission review data
       queryClient.invalidateQueries({
         queryKey: [EXAM_KEY, course_id, 'submissions'],
       });
+      // Invalidate learner's exam result and submission data
+      queryClient.invalidateQueries({
+        queryKey: [EXAM_KEY, course_id, 'result'],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ['exam-submission'],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ['exam-submissions', course_id],
+      });
+      // Invalidate user enrollments and certificates
       queryClient.invalidateQueries({ queryKey: ['enrollments'] });
       queryClient.invalidateQueries({ queryKey: ['certificates'] });
       toast.success('Answer graded');

@@ -1,5 +1,6 @@
 
 import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useEffect, useState } from 'react';
 import {
   Trophy, XCircle, CheckCircle,
   Clock, RefreshCw, Award,
@@ -16,8 +17,29 @@ const ExamResultPage = () => {
   const { course_id } = useParams<{ course_id: string }>();
   const navigate      = useNavigate();
   const courseId      = parseInt(course_id ?? '0', 10);
+  const [autoRefresh, setAutoRefresh] = useState(true);
 
-  const { data: result, isLoading } = useExamResult(courseId);
+  const { data: result, isLoading, refetch } = useExamResult(courseId);
+
+  // Auto-refresh every 5 seconds while pending
+  useEffect(() => {
+    if (!result?.is_fully_graded || !autoRefresh) return;
+
+    // Once fully graded, stop refreshing
+    setAutoRefresh(false);
+    return;
+  }, [result?.is_fully_graded, autoRefresh]);
+
+  // Poll while pending
+  useEffect(() => {
+    if (!autoRefresh || result?.is_fully_graded) return;
+
+    const interval = setInterval(() => {
+      refetch();
+    }, 5000); // Refresh every 5 seconds
+
+    return () => clearInterval(interval);
+  }, [autoRefresh, result?.is_fully_graded, refetch]);
 
   if (isLoading) return <PageSpinner />;
 
@@ -71,13 +93,20 @@ const ExamResultPage = () => {
         {!isFullyGraded ? (
           <>
             <h1 className="text-xl font-bold text-amber-800 mb-2">
-              Pending Review
+              ⏳ Pending Review
             </h1>
-            <p className="text-sm text-amber-700">
+            <p className="text-sm text-amber-700 mb-3">
               Your short answer questions are being reviewed by
               your instructor. You will be notified when grading
               is complete.
             </p>
+            <div className="inline-flex items-center gap-2 px-3 py-1.5
+                              bg-white rounded-lg border border-amber-200">
+              <div className="w-2 h-2 bg-amber-500 rounded-full animate-pulse"></div>
+              <span className="text-xs text-amber-600 font-medium">
+                Waiting for instructor feedback...
+              </span>
+            </div>
           </>
         ) : isPassed ? (
           <>
@@ -122,37 +151,70 @@ const ExamResultPage = () => {
 
       {/* Actions */}
       <div className="flex flex-col sm:flex-row gap-3">
-        {isPassed && isFullyGraded ? (
+        {!isFullyGraded ? (
+          <>
+            <Button
+              fullWidth
+              variant="secondary"
+              leftIcon={<RefreshCw size={16} />}
+              onClick={() => refetch()}
+            >
+              Check Status
+            </Button>
+            <Button
+              fullWidth
+              variant="secondary"
+              onClick={() => navigate(`/courses/${courseId}`)}
+            >
+              Back to Course
+            </Button>
+          </>
+        ) : isPassed && isFullyGraded ? (
           <Link to="/dashboard/certificates" className="flex-1">
             <Button fullWidth leftIcon={<Award size={16} />}>
               View My Certificate
             </Button>
           </Link>
-        ) : !isFullyGraded ? (
-          <Button
-            variant="secondary"
-            fullWidth
-            onClick={() => navigate(`/courses/${courseId}`)}
-          >
-            Back to Course
-          </Button>
         ) : (
           <Button
             fullWidth
             leftIcon={<RefreshCw size={16} />}
-            onClick={() => navigate(`/courses/${courseId}/exam`)}
+            onClick={() => {
+              // Clear exam result cache and navigate to exam page
+              navigate(`/courses/${courseId}/exam`, { state: { clearCache: true } });
+            }}
           >
             Retake Exam
           </Button>
         )}
-        <Button
-          variant="secondary"
-          onClick={() => navigate(`/courses/${courseId}`)}
-          className="flex-1"
-        >
-          Back to Course
-        </Button>
+        {!isPassed && isFullyGraded && (
+          <Button
+            fullWidth
+            variant="secondary"
+            onClick={() => navigate(`/courses/${courseId}`)}
+          >
+            Back to Course
+          </Button>
+        )}
       </div>
+
+      {/* Pending Review Info */}
+      {!isFullyGraded && (
+        <Card padding="md" className="bg-blue-50 border border-blue-200">
+          <div className="flex gap-3">
+            <Clock className="text-blue-500 flex-shrink-0 mt-1" size={20} />
+            <div className="text-sm text-blue-800">
+              <p className="font-semibold mb-1">What's happening?</p>
+              <ul className="text-xs text-blue-700 space-y-1">
+                <li>✓ Your multiple choice answers have been graded</li>
+                <li>⏳ Your instructor is reviewing your short answers</li>
+                <li>📧 You'll be notified when grading is complete</li>
+                <li>🔄 You can return to this page to check for updates</li>
+              </ul>
+            </div>
+          </div>
+        </Card>
+      )}
 
       {/* Answer review — only when fully graded */}
       {isFullyGraded && result.answers.length > 0 && (

@@ -61,6 +61,7 @@ export interface ExamSubmissionForMentor {
   is_passed:       boolean;
   is_fully_graded: boolean;
   pending_count:   number;
+  answers?:        ExamAnswerWithQuestion[];
 }
 
 export interface CreateExamBody {

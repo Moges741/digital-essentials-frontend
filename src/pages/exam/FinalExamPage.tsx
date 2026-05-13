@@ -1,6 +1,7 @@
 
-import { useState }     from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
+import { useQueryClient } from '@tanstack/react-query';
 import { ClipboardList, Lock, AlertCircle } from 'lucide-react';
 import { useExam, useSubmitExam, useExamResult } from '../../hooks/useExam';
 import { useMyEnrollments } from '../../hooks/useEnrollment';
@@ -104,7 +105,21 @@ const SAQuestion = ({
 const FinalExamPage = () => {
   const { course_id }  = useParams<{ course_id: string }>();
   const navigate       = useNavigate();
+  const location       = useLocation();
   const courseId       = parseInt(course_id ?? '0', 10);
+  const queryClient    = useQueryClient();
+  const [isRetaking, setIsRetaking] = useState(false);
+
+  // Clear cache if coming from retake
+  useEffect(() => {
+    if (location.state?.clearCache) {
+      setIsRetaking(true);
+      // Completely remove old result from cache
+      queryClient.removeQueries({ queryKey: ['exam', courseId, 'result'] });
+      // Clean up the location state
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+  }, [location.state?.clearCache, queryClient, courseId]);
 
   const { data: exam,        isLoading: examLoading }   = useExam(courseId);
   const { data: result,      isLoading: resultLoading } = useExamResult(courseId);
@@ -122,8 +137,9 @@ const FinalExamPage = () => {
 
   if (isLoading) return <PageSpinner />;
 
-  // Already submitted → redirect to result
-  if (result) {
+  // Already submitted AND fully graded → redirect to result
+  // BUT: skip if we're retaking (cache was just cleared)
+  if (result && result.is_fully_graded && !isRetaking) {
     navigate(`/courses/${courseId}/exam/result`, { replace: true });
     return null;
   }
@@ -185,6 +201,7 @@ const FinalExamPage = () => {
   );
 
   const questions    = exam.questions ?? [];
+  const hasShortAnswer = questions.some(q => q.question_type === 'short_answer');
   const answeredCount = Object.keys(answers).filter(
     (id) => answers[parseInt(id)].trim() !== ''
   ).length;
@@ -192,6 +209,8 @@ const FinalExamPage = () => {
 
   const handleSubmit = () => {
     if (!allAnswered) return;
+    // Clear the retaking flag after submission
+    setIsRetaking(false);
     submit({
       answers: questions.map((q) => ({
         question_id:  q.question_id,
@@ -229,14 +248,34 @@ const FinalExamPage = () => {
           <ul className="list-disc list-inside flex flex-col gap-1
                            text-xs text-blue-600">
             <li>Answer all questions before submitting</li>
-            <li>Multiple choice answers are graded automatically</li>
-            <li>Short answers will be reviewed by your instructor</li>
+            <li>
+              {hasShortAnswer
+                ? '✅ Multiple choice answers are graded instantly'
+                : '⚡ All answers are graded instantly'}
+            </li>
+            {hasShortAnswer && (
+              <li>
+                ⏳ Your short answers will be reviewed by your instructor
+                (you'll see "Pending Review" while they grade)
+              </li>
+            )}
             <li>
               You need {exam.passing_score}% or higher to pass
               and receive your certificate
             </li>
-            <li>You can retake the exam if you don't pass</li>
+            <li>
+              {hasShortAnswer
+                ? '🔄 You can retake after instructor feedback'
+                : '🔄 You can retake immediately if needed'}
+            </li>
           </ul>
+          {hasShortAnswer && (
+            <div className="mt-3 p-2 bg-blue-100 rounded text-xs text-blue-800">
+              <strong>What happens next:</strong> After submission, you'll see a
+              "Pending Review" status. Check back later for your instructor's
+              feedback and final grade.
+            </div>
+          )}
         </div>
       </div>
 

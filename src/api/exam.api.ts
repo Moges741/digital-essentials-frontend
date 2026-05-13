@@ -6,6 +6,7 @@ import type {
   ExamWithQuestions,
   ExamResult,
   ExamSubmissionForMentor,
+  ExamAnswerWithQuestion,
   CreateExamBody,
   CreateQuestionBody,
   SubmitExamBody,
@@ -35,7 +36,7 @@ export const examApi = {
     course_id:     number,
     passing_score: number
   ): Promise<FinalExam> => {
-    const res = await apiClient.patch<ApiResponse<{ exam: FinalExam }>>(
+    const res = await apiClient.put<ApiResponse<{ exam: FinalExam }>>(
       `/courses/${course_id}/exam`, { passing_score }
     );
     return res.data.data.exam;
@@ -90,13 +91,24 @@ export const examApi = {
     return res.data.data.submissions;
   },
 
+  getSubmission: async (
+    course_id: number,
+    submission_id: number
+  ): Promise<ExamSubmissionForMentor & { answers: ExamAnswerWithQuestion[] }> => {
+    const res = await apiClient.get<ApiResponse<{ submission: ExamSubmissionForMentor & { answers: ExamAnswerWithQuestion[] } }>>(
+      `/courses/${course_id}/exam/submissions/${submission_id}`
+    );
+    return res.data.data.submission;
+  },
+
   gradeAnswer: async (
-    course_id:  number,
-    answer_id:  number,
-    is_correct: boolean
+    course_id:    number,
+    submission_id: number,
+    answer_id:    number,
+    is_correct:   boolean
   ): Promise<void> => {
-    await apiClient.patch(
-      `/courses/${course_id}/exam/answers/${answer_id}`,
+    await apiClient.post(
+      `/courses/${course_id}/exam/submissions/${submission_id}/answers/${answer_id}/grade`,
       { is_correct }
     );
   },

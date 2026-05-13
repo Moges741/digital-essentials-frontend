@@ -1,72 +1,20 @@
 // src/pages/exam/ExamReviewPage.tsx
 // Mentor reviews short answer submissions and grades them
 
-import { useState }    from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
-  CheckCircle, XCircle, Clock,
   ArrowLeft, Users,
 } from 'lucide-react';
 import {
   useExamSubmissions,
-  useGradeAnswer,
   useExam,
 } from '../../hooks/useExam';
-import { examApi }     from '../../api/exam.api';
-import { useQuery }    from '@tanstack/react-query';
-import Card, { CardHeader, CardTitle } from '../../components/ui/Card';
+import Card, { CardHeader } from '../../components/ui/Card';
 import Button          from '../../components/ui/Button';
 import Badge           from '../../components/ui/Badge';
 import { PageSpinner } from '../../components/ui/Spinner';
 import EmptyState      from '../../components/ui/EmptyState';
 import { formatDateTime } from '../../utils/format';
-import type { ExamAnswerWithQuestion } from '../../types/exam.types';
-
-// ── Submission detail view ────────────────────────────────────
-const SubmissionDetail = ({
-  submissionId,
-  courseId,
-  learnerName,
-  onBack,
-}: {
-  submissionId: number;
-  courseId:     number;
-  learnerName:  string;
-  onBack:       () => void;
-}) => {
-//   const { mutate: grade, isPending } = useGradeAnswer(courseId);
-
-  // Fetch answers for this submission
-  const { data: answers, isLoading } = useQuery({
-    queryKey: ['exam-answers', submissionId],
-    queryFn:  async () => {
-      const res = await examApi.getSubmissions(courseId);
-      // We get submissions from existing endpoint
-      // For individual answers we need them from result
-      return res;
-    },
-  });
-
-  if (isLoading) return <PageSpinner />;
-
-  return (
-    <div className="flex flex-col gap-4">
-      <button
-        onClick={onBack}
-        className="flex items-center gap-2 text-sm text-gray-500
-                    hover:text-gray-700"
-      >
-        <ArrowLeft size={15} /> Back to Submissions
-      </button>
-      <h2 className="text-lg font-bold text-gray-900">
-        {learnerName}'s Submission
-      </h2>
-      <p className="text-sm text-gray-400">
-        Grading interface — mark each answer correct or incorrect
-      </p>
-    </div>
-  );
-};
 
 // ── Main Page ─────────────────────────────────────────────────
 const ExamReviewPage = () => {

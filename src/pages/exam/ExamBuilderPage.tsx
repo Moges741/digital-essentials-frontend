@@ -6,7 +6,6 @@ import { zodResolver }    from '@hookform/resolvers/zod';
 import { z }              from 'zod';
 import {
   Plus, Trash2, ArrowLeft,
-  CheckCircle, HelpCircle, Settings,
 } from 'lucide-react';
 import {
   useExam, useCreateExam, useAddQuestion,
@@ -78,7 +77,7 @@ const ExamBuilderPage = () => {
   const { data: exam, isLoading }   = useExam(courseId);
   const { mutate: createExam, isPending: creating } = useCreateExam(courseId);
   const { mutate: addQuestion, isPending: adding }  = useAddQuestion(courseId);
-  const { mutate: deleteQ, isPending: deletingQ }   = useDeleteQuestion(courseId);
+  const { mutate: deleteQ }   = useDeleteQuestion(courseId);
   const { mutate: deleteExam, isPending: deletingExam } = useDeleteExam(courseId);
 
   // Exam creation form
