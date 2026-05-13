@@ -30,7 +30,6 @@ export const feedbackApi = {
   },
 
   // GET /api/feedback/courses/:course_id
-  // Mentor/admin views all feedback for a course
   getByCourse: async (
     course_id: number
   ): Promise<FeedbackWithDetails[]> => {
