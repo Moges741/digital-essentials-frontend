@@ -49,7 +49,15 @@ import AdminUsers from './pages/dashboard/AdminUsers';
 // Shared pages
 import ChatPage from './pages/chat/ChatPage';
 
-// ── Layout wrappers ───────────────────────────────────────────
+// AuthLayout — no navbar, just sidebar layout
+const AuthLayout = ({ children }: { children: React.ReactNode }) => (
+  <>
+    <OfflineBanner />
+    <DashboardLayout>{children}</DashboardLayout>
+  </>
+);
+
+// PublicLayout — navbar + footer, no sidebar
 const PublicLayout = ({ children }: { children: React.ReactNode }) => (
   <div className="flex flex-col min-h-screen">
     <Navbar />
@@ -60,14 +68,6 @@ const PublicLayout = ({ children }: { children: React.ReactNode }) => (
     <Footer />
   </div>
 );
-
-const AuthLayout = ({ children }: { children: React.ReactNode }) => (
-  <>
-    <OfflineBanner />
-    <DashboardLayout>{children}</DashboardLayout>
-  </>
-);
-
 // ── App ───────────────────────────────────────────────────────
 const App = () => {
   return (

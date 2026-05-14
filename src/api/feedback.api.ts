@@ -10,7 +10,6 @@ import type { ApiResponse } from '../types/auth.types';
 export const feedbackApi = {
 
   // POST /api/feedback/enrollments/:enrollment_id
-  // Learner submits feedback for an enrollment
   create: async (body: CreateFeedbackBody): Promise<Feedback> => {
     const { enrollment_id, ...rest } = body;
     const res = await apiClient.post<ApiResponse<{ feedback: Feedback }>>(
@@ -21,7 +20,6 @@ export const feedbackApi = {
   },
 
   // GET /api/feedback/my
-  // Learner views all feedback they have submitted
   getMy: async (): Promise<FeedbackWithDetails[]> => {
     const res = await apiClient.get<ApiResponse<{ feedback: FeedbackWithDetails[] }>>(
       '/feedback/my'
