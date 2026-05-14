@@ -22,4 +22,17 @@ export const certificateApi = {
     const res = await apiClient.get<ApiResponse<{ certificate: CertificateWithDetails }>>(`/certificates/${certificate_id}`);
     return res.data.data.certificate;
   },
+
+  // GET /api/certificates/:certificate_id/download?disposition=inline|attachment
+  // Returns certificate PDF as blob using authenticated request
+  getPdfBlob: async (
+    certificate_id: number,
+    disposition: 'inline' | 'attachment' = 'attachment'
+  ): Promise<Blob> => {
+    const res = await apiClient.get(`/certificates/${certificate_id}/download`, {
+      params: { disposition },
+      responseType: 'blob',
+    });
+    return res.data as Blob;
+  },
 };

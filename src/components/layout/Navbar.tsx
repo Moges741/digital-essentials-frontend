@@ -1,14 +1,12 @@
 
 import { Link, useNavigate } from 'react-router-dom';
-import { BookMarked, Menu, X } from 'lucide-react';
+import { BookMarked} from 'lucide-react';
 import { useAuthStore }      from '../../store/auth.store';
-import { useUIStore }        from '../../store/ui.store';
 import Button                from '../ui/Button';
 import { getDashboardByRole } from '../../utils/constants';
 
 const Navbar = () => {
   const { isAuthenticated, user } = useAuthStore();
-  const { sidebarOpen, toggleSidebar } = useUIStore();
   const navigate                  = useNavigate();
 
   const handleGoToDashboard = () => {
@@ -26,23 +24,7 @@ const Navbar = () => {
 
         {/* Hamburger + Logo */}
         <div className="flex items-center gap-2">
-          {/* Hamburger menu — visible on mobile dashboard */}
-          {isAuthenticated && (
-            <button
-              onClick={toggleSidebar}
-              className="md:hidden p-2 hover:bg-gray-100 rounded-lg
-                          transition-colors duration-150"
-              aria-label="Toggle sidebar"
-            >
-              {sidebarOpen ? (
-                <X size={20} className="text-gray-600" />
-              ) : (
-                <Menu size={20} className="text-gray-600" />
-              )}
-            </button>
-          )}
-
-          {/* Logo */}
+          
           <Link
             to="/"
             className="flex items-center gap-2.5 font-bold
