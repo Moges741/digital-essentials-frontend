@@ -3,6 +3,20 @@ import type { ApiResponse } from '../types/auth.types';
 import type { User } from '../types/auth.types';
 import type { Course } from '../types/course.types';
 
+// ─── Types ───────────────────────────────────────────────────
+interface Feedback {
+  feedback_id: number;
+  enrollment_id: number;
+  rating: number;
+  comments: string | null;
+  submitted_at: string;
+  course_id: number;
+  course_title: string;
+  user_name: string;
+  user_email: string;
+  creator_name: string;
+}
+
 // ─── Admin API functions ──────────────────────────────────────
 
 export const adminApi = {
@@ -28,5 +42,11 @@ export const adminApi = {
   toggleCoursePublish: async (courseId: number): Promise<Course> => {
     const res = await apiClient.patch<ApiResponse<{ course: Course }>>(`/admin/courses/${courseId}/publish`);
     return res.data.data.course;
+  },
+
+  // Get all feedback
+  getAllCourseFeedback: async (): Promise<Feedback[]> => {
+    const res = await apiClient.get<ApiResponse<{ feedback: Feedback[] }>>('/admin/feedback');
+    return res.data.data.feedback;
   },
 };

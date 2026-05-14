@@ -43,7 +43,8 @@ import ExamResultPage  from './pages/exam/ExamResultPage';
 import ExamReviewPage    from './pages/exam/ExamReviewPage';
 import ExamSubmissionPage from './pages/exam/ExamSubmissionPage';
 // Admin pages
-import AdminDashboard from './pages/dashboard/AdminDashboard';
+import AdminPanel from './pages/dashboard/AdminPanel';
+import AdminUsers from './pages/dashboard/AdminUsers';
 
 // Shared pages
 import ChatPage from './pages/chat/ChatPage';
@@ -164,7 +165,10 @@ const App = () => {
           <RoleGuard allowedRoles={['administrator']} />
         }>
           <Route path="/admin" element={
-            <AuthLayout><AdminDashboard /></AuthLayout>
+            <AuthLayout><AdminPanel /></AuthLayout>
+          } />
+          <Route path="/admin/users" element={
+            <AuthLayout><AdminUsers /></AuthLayout>
           } />
         </Route>
 
