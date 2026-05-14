@@ -3,7 +3,7 @@ import { NavLink, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard, BookOpen,
   BarChart2, Award, MessageCircle,
-  PlusCircle, Users, Settings,
+  PlusCircle, Users, Settings, ScrollText,
   BookMarked, LogOut, ChevronLeft, ChevronRight
 } from 'lucide-react';
 import { useAuthStore } from '../../store/auth.store';
@@ -118,6 +118,11 @@ const adminNav: NavGroup[] = [
         label: 'Users',
         to:    '/admin/users',
         icon:  <Users size={17} />,
+      },
+      {
+        label: 'Manage Certificates',
+        to:    '/admin/certificates',
+        icon:  <ScrollText size={17} />,
       },
     ],
   },

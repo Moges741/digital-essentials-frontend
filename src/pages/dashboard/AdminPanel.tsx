@@ -2,12 +2,11 @@ import { useState }       from 'react';
 import { useNavigate }    from 'react-router-dom';
 import {
   Users, BookOpen, GraduationCap,
-  Award, Shield, Eye, EyeOff,
-  MessageSquare, TrendingUp,
+  Shield, Eye, EyeOff,
+  MessageSquare,
 } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { adminApi }       from '../../api/admin.api';
-import { useAuthStore }   from '../../store/auth.store';
 import Card, { CardHeader, CardTitle } from '../../components/ui/Card';
 import Badge             from '../../components/ui/Badge';
 import Button            from '../../components/ui/Button';
@@ -89,7 +88,6 @@ const AdminPanel = () => {
 
   // Stats
   const learners = allUsers.filter((u) => u.role === 'learner').length;
-  const mentors  = allUsers.filter((u) => u.role === 'mentor').length;
   const avgRating = allFeedback.length > 0
     ? (allFeedback.reduce((sum, f) => sum + (f.rating || 0), 0) / allFeedback.length).toFixed(1)
     : 0;

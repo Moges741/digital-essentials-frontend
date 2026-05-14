@@ -17,6 +17,24 @@ interface Feedback {
   creator_name: string;
 }
 
+export interface AdminCertificate {
+  certificate_id: number;
+  user_id: number;
+  course_id: number;
+  issued_at: string;
+  certificate_url: string | null;
+  learner_name: string;
+  learner_email: string;
+  course_title: string;
+}
+
+export interface UpdateAdminCertificateBody {
+  user_id?: number;
+  course_id?: number;
+  issued_at?: string;
+  certificate_url?: string | null;
+}
+
 // ─── Admin API functions ──────────────────────────────────────
 
 export const adminApi = {
@@ -48,5 +66,28 @@ export const adminApi = {
   getAllCourseFeedback: async (): Promise<Feedback[]> => {
     const res = await apiClient.get<ApiResponse<{ feedback: Feedback[] }>>('/admin/feedback');
     return res.data.data.feedback;
+  },
+
+  // Get all certificates
+  getAllCertificates: async (): Promise<AdminCertificate[]> => {
+    const res = await apiClient.get<ApiResponse<{ certificates: AdminCertificate[] }>>('/admin/certificates');
+    return res.data.data.certificates;
+  },
+
+  // Update certificate
+  updateCertificate: async (
+    certificateId: number,
+    payload: UpdateAdminCertificateBody
+  ): Promise<AdminCertificate> => {
+    const res = await apiClient.patch<ApiResponse<{ certificate: AdminCertificate }>>(
+      `/admin/certificates/${certificateId}`,
+      payload
+    );
+    return res.data.data.certificate;
+  },
+
+  // Delete certificate
+  deleteCertificate: async (certificateId: number): Promise<void> => {
+    await apiClient.delete(`/admin/certificates/${certificateId}`);
   },
 };
