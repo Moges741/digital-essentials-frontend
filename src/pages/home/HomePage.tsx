@@ -538,7 +538,7 @@ const HomePage = () => {
 
           <p className="text-primary-400 text-sm mt-8">
             Jimma University · Jimma Institute of Technology ·
-            Software Engineering Program · CBTP Phase II
+            Software Engineering Program · CBTP
           </p>
 
         </div>

@@ -18,9 +18,21 @@ import type { Role }            from '../../types/auth.types';
 
 // ── Zod schema — mirrors backend validation ───────────────────
 const registerSchema = z.object({
-  name:            z.string().min(2, 'Name must be at least 2 characters').max(100),
+  name:            z.string()
+    .min(2, 'Name must be at least 2 characters')
+    .max(100, 'Name must not exceed 100 characters')
+    .regex(/^[a-zA-Z\s-]+$/, 'Name can only contain letters, spaces, and hyphens')
+    .refine(
+      (val) => !/^\d+$/.test(val),
+      'Name cannot be only numbers'
+    ),
   email:           z.string().min(1, 'Email is required').email('Please enter a valid email'),
-  password:        z.string().min(8, 'Password must be at least 8 characters'),
+  password:        z.string()
+    .min(8, 'Password must be at least 8 characters')
+    .regex(/[A-Z]/, 'Password must contain at least one uppercase letter')
+    .regex(/[a-z]/, 'Password must contain at least one lowercase letter')
+    .regex(/\d/, 'Password must contain at least one number')
+    .regex(/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/, 'Password must contain at least one special character'),
   confirmPassword: z.string().min(1, 'Please confirm your password'),
   role:            z.enum(['learner', 'mentor', 'administrator']),
   specialization:  z.string().optional(),
@@ -164,6 +176,7 @@ const RegisterPage = () => {
               placeholder="Moges Sisay"
               leftIcon={<User size={16} />}
               error={errors.name?.message}
+              helperText="Letters, spaces, and hyphens only (not just numbers)"
               autoComplete="name"
               required
               {...registerField('name')}
@@ -186,6 +199,7 @@ const RegisterPage = () => {
               placeholder="Minimum 8 characters"
               leftIcon={<Lock size={16} />}
               error={errors.password?.message}
+              helperText="Must include: uppercase, lowercase, number, and special character (!@#$%^&*, etc.)"
               autoComplete="new-password"
               required
               {...registerField('password')}
