@@ -20,6 +20,7 @@ import RoleGuard       from './components/guards/RoleGuard';
 import HomePage         from './pages/home/HomePage';
 import LoginPage        from './pages/auth/LoginPage';
 import RegisterPage     from './pages/auth/RegisterPage';
+import VerifyEmailPage  from './pages/auth/VerifyEmailPage';
 import GoogleCallbackPage from './pages/auth/GoogleCallbackPage';
 import CoursesPage      from './pages/courses/CoursesPage';
 import CourseDetailPage from './pages/courses/CourseDetailPage';
@@ -83,6 +84,9 @@ const App = () => {
       } />
       <Route path="/register" element={
         <PublicLayout><RegisterPage /></PublicLayout>
+      } />
+      <Route path="/verify-email" element={
+        <PublicLayout><VerifyEmailPage /></PublicLayout>
       } />
       <Route path="/auth/google/callback" element={
         <PublicLayout><GoogleCallbackPage /></PublicLayout>

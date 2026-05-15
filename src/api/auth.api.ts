@@ -3,6 +3,7 @@ import apiClient from './axios';
 import type {
   LoginBody,
   RegisterBody,
+  RegisterResponse,
   AuthResponse,
   ApiResponse,
 } from '../types/auth.types';
@@ -17,8 +18,8 @@ export const authApi = {
     return res.data.data;
   },
 
-  register: async (body: RegisterBody): Promise<AuthResponse> => {
-    const res = await apiClient.post<ApiResponse<AuthResponse>>(
+  register: async (body: RegisterBody): Promise<RegisterResponse> => {
+    const res = await apiClient.post<ApiResponse<RegisterResponse>>(
       '/auth/register',
       body
     );

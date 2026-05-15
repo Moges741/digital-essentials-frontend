@@ -38,16 +38,14 @@ export const useLogin = () => {
 
 // ── Register Hook ─────────────────────────────────────────────
 export const useRegister = () => {
-  const setAuth  = useAuthStore((state) => state.setAuth);
   const navigate = useNavigate();
 
   return useMutation({
     mutationFn: (body: RegisterBody) => authApi.register(body),
 
     onSuccess: (data) => {
-      setAuth(data.user, data.token);
-      toast.success(`Account created! Welcome, ${data.user.name}!`);
-      navigate(getDashboardByRole(data.user.role));
+      toast.success(`Account created for ${data.user.name}. Check your email to verify your account.`);
+      navigate('/login');
     },
 
     onError: (error: any) => {

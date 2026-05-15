@@ -71,13 +71,6 @@ const roleOptions: RoleOption[] = [
     icon:        <Briefcase size={20} />,
     color:       'success',
   },
-  {
-    value:       'administrator',
-    label:       'Administrator',
-    description: 'I want to manage the platform',
-    icon:        <User size={20} />,
-    color:       'warning',
-  },
 ];
 
 const RegisterPage = () => {
@@ -139,7 +132,7 @@ const RegisterPage = () => {
               <label className="text-sm font-medium text-gray-700">
                 I am a <span className="text-red-500">*</span>
               </label>
-              <div className="grid grid-cols-3 gap-3">
+              <div className="grid grid-cols-2 gap-3">
                 {roleOptions.map((option) => (
                   <button
                     key={option.value}

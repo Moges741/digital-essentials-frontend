@@ -8,6 +8,7 @@ export interface User {
   email:      string;
   role:       Role;
   is_active:  boolean;
+  email_verified?: boolean;
   created_at: string;
   updated_at: string;
 }
@@ -15,6 +16,10 @@ export interface User {
 export interface AuthResponse {
   user:  User;
   token: string;
+}
+
+export interface RegisterResponse {
+  user: User;
 }
 
 export interface LoginBody {
