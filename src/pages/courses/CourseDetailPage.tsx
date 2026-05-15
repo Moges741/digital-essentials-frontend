@@ -402,7 +402,7 @@ const CourseDetailPage = () => {
   const lessons = course.lessons ?? [];
 
   return (
-    <div className="max-w-5xl mx-auto px-4 py-10">
+    <div className="mt-16 max-w-5xl mx-auto px-4 py-10">
 
       {/* Breadcrumb */}
       <nav className="flex items-center gap-2 text-sm text-gray-500 mb-6">
