@@ -11,7 +11,7 @@ import {
 
 import { useRegister }   from '../../hooks/useAuth';
 import { useAuthStore }  from '../../store/auth.store';
-import Input, { Textarea } from '../../components/ui/Input';
+import Input, { Textarea, PasswordInput } from '../../components/ui/Input';
 import Button              from '../../components/ui/Button';
 import { getDashboardByRole } from '../../utils/constants';
 import type { Role }            from '../../types/auth.types';
@@ -193,9 +193,8 @@ const RegisterPage = () => {
               {...registerField('email')}
             />
 
-            <Input
+            <PasswordInput
               label="Password"
-              type="password"
               placeholder="Minimum 8 characters"
               leftIcon={<Lock size={16} />}
               error={errors.password?.message}
@@ -205,9 +204,8 @@ const RegisterPage = () => {
               {...registerField('password')}
             />
 
-            <Input
+            <PasswordInput
               label="Confirm password"
-              type="password"
               placeholder="Repeat your password"
               leftIcon={<Lock size={16} />}
               error={errors.confirmPassword?.message}

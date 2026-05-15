@@ -7,7 +7,7 @@ import { Mail, Lock, BookOpen } from 'lucide-react';
 
 import { useLogin }      from '../../hooks/useAuth';
 import { useAuthStore }  from '../../store/auth.store';
-import Input             from '../../components/ui/Input';
+import Input, { PasswordInput } from '../../components/ui/Input';
 import Button            from '../../components/ui/Button';
 import { getDashboardByRole } from '../../utils/constants';
 import { useGoogleLogin } from '../../hooks/useGoogleAuth';  // New hook
@@ -77,9 +77,8 @@ const LoginPage = () => {
               {...register('email')}
             />
 
-            <Input
+            <PasswordInput
               label="Password"
-              type="password"
               placeholder="Enter your password"
               leftIcon={<Lock size={16} />}
               error={errors.password?.message}
