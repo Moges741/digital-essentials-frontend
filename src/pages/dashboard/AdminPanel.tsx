@@ -144,6 +144,33 @@ const AdminPanel = () => {
         />
       </div>
 
+      {/* Management Shortcuts */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <Card padding="md" className="flex flex-col items-center justify-center text-center cursor-pointer hover:shadow-md transition-shadow" onClick={() => navigate('/admin/mentors')}>
+          <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center mb-3">
+            <Users size={20} className="text-purple-600" />
+          </div>
+          <h3 className="text-sm font-semibold text-gray-900 mb-1">Manage Mentors</h3>
+          <p className="text-xs text-gray-500">View and edit mentor profiles</p>
+        </Card>
+
+        <Card padding="md" className="flex flex-col items-center justify-center text-center cursor-pointer hover:shadow-md transition-shadow" onClick={() => navigate('/admin/certificates')}>
+          <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center mb-3">
+            <BookOpen size={20} className="text-green-600" />
+          </div>
+          <h3 className="text-sm font-semibold text-gray-900 mb-1">Manage Certificates</h3>
+          <p className="text-xs text-gray-500">View and edit certificates</p>
+        </Card>
+
+        <Card padding="md" className="flex flex-col items-center justify-center text-center cursor-pointer hover:shadow-md transition-shadow" onClick={() => navigate('/admin/users')}>
+          <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mb-3">
+            <Users size={20} className="text-blue-600" />
+          </div>
+          <h3 className="text-sm font-semibold text-gray-900 mb-1">Manage Users</h3>
+          <p className="text-xs text-gray-500">View all users and roles</p>
+        </Card>
+      </div>
+
       {/* Courses management */}
       <Card padding="md">
         <CardHeader>

@@ -28,11 +28,27 @@ export interface AdminCertificate {
   course_title: string;
 }
 
+export interface AdminMentor {
+  user_id: number;
+  name: string;
+  email: string;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+  specialization: string;
+  qualifications: string | null;
+}
+
 export interface UpdateAdminCertificateBody {
   user_id?: number;
   course_id?: number;
   issued_at?: string;
   certificate_url?: string | null;
+}
+
+export interface UpdateMentorProfileBody {
+  specialization: string;
+  qualifications?: string;
 }
 
 // ─── Admin API functions ──────────────────────────────────────
@@ -89,5 +105,23 @@ export const adminApi = {
   // Delete certificate
   deleteCertificate: async (certificateId: number): Promise<void> => {
     await apiClient.delete(`/admin/certificates/${certificateId}`);
+  },
+
+  // Get all mentors
+  getAllMentors: async (): Promise<AdminMentor[]> => {
+    const res = await apiClient.get<ApiResponse<{ mentors: AdminMentor[] }>>('/admin/mentors');
+    return res.data.data.mentors;
+  },
+
+  // Update mentor profile
+  updateMentorProfile: async (
+    userId: number,
+    payload: UpdateMentorProfileBody
+  ): Promise<AdminMentor> => {
+    const res = await apiClient.patch<ApiResponse<{ mentor: AdminMentor }>>(
+      `/admin/mentors/${userId}`,
+      payload
+    );
+    return res.data.data.mentor;
   },
 };

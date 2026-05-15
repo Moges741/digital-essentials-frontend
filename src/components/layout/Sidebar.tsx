@@ -1,5 +1,5 @@
 
-import { NavLink, useNavigate } from 'react-router-dom';
+import { Link, NavLink, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard, BookOpen,
   BarChart2, Award, MessageCircle,
@@ -49,6 +49,7 @@ const learnerNav: NavGroup[] = [
         to:    '/dashboard/certificates',
         icon:  <Award size={17} />,
       },
+     
     ],
   },
   {
@@ -124,6 +125,11 @@ const adminNav: NavGroup[] = [
         to:    '/admin/certificates',
         icon:  <ScrollText size={17} />,
       },
+       {
+        label :'Mentors',
+        to:    '/admin/mentors',
+        icon:  <Users size={17} />,
+      }
     ],
   },
   {
@@ -192,7 +198,8 @@ const Sidebar = () => {
       `}>
 
       {/* ── Logo ───────────────────────────────────────── */}
-      <div className={`flex items-center gap-2.5 px-4 py-4
+      <Link to='/'>
+            <div className={`flex items-center gap-2.5 px-4 py-4
                        border-b border-gray-100 flex-shrink-0
                        ${!sidebarOpen && 'justify-center px-0'}`}>
         <div className="w-8 h-8 bg-primary-600 rounded-lg
@@ -210,6 +217,8 @@ const Sidebar = () => {
           </div>
         )}
       </div>
+      </Link>
+
 
       {/* ── Navigation ─────────────────────────────────── */}
       <nav className={`flex-1 overflow-y-auto py-3 flex flex-col gap-5 ${sidebarOpen ? 'px-3' : 'px-2'}`}>

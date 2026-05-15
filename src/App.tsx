@@ -49,6 +49,7 @@ import ExamSubmissionPage from './pages/exam/ExamSubmissionPage';
 import AdminPanel from './pages/dashboard/AdminPanel';
 import AdminUsers from './pages/dashboard/AdminUsers';
 import AdminCertificates from './pages/dashboard/AdminCertificates.tsx';
+import AdminMentors from './pages/dashboard/AdminMentors';
 
 // Shared pages
 import ChatPage from './pages/chat/ChatPage';
@@ -185,6 +186,9 @@ const App = () => {
           } />
           <Route path="/admin/certificates" element={
             <AuthLayout><AdminCertificates /></AuthLayout>
+          } />
+          <Route path="/admin/mentors" element={
+            <AuthLayout><AdminMentors /></AuthLayout>
           } />
         </Route>
 

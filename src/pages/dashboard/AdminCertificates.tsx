@@ -165,16 +165,11 @@ const AdminCertificates = () => {
     }
   };
 
-  const isLoading = certsLoading || usersLoading || coursesLoading;
-  if (isLoading) return <PageSpinner />;
-
   const allCertificates = certificates ?? [];
   const allUsers = users ?? [];
   const allCourses = courses ?? [];
 
-  const selectedUser = allUsers.find((u) => u.user_id === parseInt(form.user_id, 10));
-  const selectedCourse = allCourses.find((c) => c.course_id === parseInt(form.course_id, 10));
-
+  // Move memos before early return to follow rules of hooks
   const filteredLearners = useMemo(
     () => allUsers.filter((u) => {
       const q = learnerFilter.trim().toLowerCase();
@@ -207,6 +202,12 @@ const AdminCertificates = () => {
     }),
     [allCertificates, search]
   );
+
+  const isLoading = certsLoading || usersLoading || coursesLoading;
+  if (isLoading) return <PageSpinner />;
+
+  const selectedUser = allUsers.find((u) => u.user_id === parseInt(form.user_id, 10));
+  const selectedCourse = allCourses.find((c) => c.course_id === parseInt(form.course_id, 10));
 
   return (
     <div className="flex flex-col gap-8">
