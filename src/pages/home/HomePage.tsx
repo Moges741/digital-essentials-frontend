@@ -24,28 +24,28 @@ import CourseCard         from '../../components/course/CourseCard';
 // Replace filenames with your actual images in /public folder
 const heroSlides = [
   {
-    image:    '/hero1.jpg',
+    image:    '/hero1.png',
     tag:      'Welcome to Digital Essentials',
     headline: 'Learn Digital Skills',
     sub:      'At Your Own Pace',
     body:     'Empowering communities in Jimma with the digital knowledge they need to thrive in a connected world.',
   },
   {
-    image:    '/hero2.jpg',
+    image:    '/hero2.png',
     tag:      'Bosa Addis Kebele · Jimma, Ethiopia',
     headline: 'Learn Anywhere',
     sub:      'Online or Offline',
     body:     'Download lessons, complete exercises, and sync your progress when you reconnect — no internet required.',
   },
   {
-    image:    '/hero3.jpg',
+    image:    '/hero3.png',
     tag:      'AI-Powered Learning',
     headline: 'Ask Anything',
     sub:      'Get Instant Answers',
     body:     'Our built-in AI assistant powered by Groq answers your questions in plain language, any time you need help.',
   },
   {
-    image:    '/hero4.jpg',
+    image:    '/hero4.png',
     tag:      'Earn Your Certificate',
     headline: 'Complete Courses',
     sub:      'Prove Your Skills',
@@ -239,8 +239,8 @@ const HeroCarousel = ({
                       <Button
                         size="lg"
                         onClick={onGetStarted}
-                        className="bg-white text-primary-700
-                                    hover:bg-blue-50
+                        className="bg-white text-blue-300
+                                    hover:bg-blue-100
                                     font-bold shadow-lg
                                     shadow-black/20"
                         rightIcon={<ArrowRight size={18} />}
@@ -254,7 +254,7 @@ const HeroCarousel = ({
                         <Button
                           size="lg"
                           variant="ghost"
-                          className="text-white border border-white/40
+                          className="text-blue-300 border border-white/40
                                       hover:bg-white/10 font-semibold
                                       backdrop-blur-sm"
                         >
@@ -698,7 +698,7 @@ const OfflineSection = ({
             <Button
               size="lg"
               onClick={onGetStarted}
-              className="bg-white text-primary-700 hover:bg-blue-50
+              className="bg-white text-primary-800 hover:bg-blue-50
                           font-bold shadow-xl shadow-black/20"
               rightIcon={<ArrowRight size={18} />}
             >
@@ -757,7 +757,7 @@ const FinalCTA = ({
         <Button
           size="lg"
           onClick={onGetStarted}
-          className="bg-white text-primary-700 hover:bg-blue-50
+          className="bg-white text-primary-900 hover:bg-blue-50
                       font-bold shadow-xl shadow-black/30"
           rightIcon={<ArrowRight size={18} />}
         >
@@ -777,7 +777,7 @@ const FinalCTA = ({
 
       <p className="text-primary-500 text-sm mt-10">
         Jimma University · Jimma Institute of Technology ·
-        Software Engineering Program · CBTP Phase II
+        Software Engineering Program · CBTP Phase III
       </p>
 
     </div>

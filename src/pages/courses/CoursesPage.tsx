@@ -68,7 +68,7 @@ const CoursesPage = () => {
   const totalPages = data?.totalPages ?? 1;
 
   return (
-    <div className="max-w-screen-xl mx-auto px-4 py-10">
+    <div className="mt-12 max-w-screen-xl mx-auto px-4 py-10">
 
       {/* Page header */}
       <div className="flex flex-col sm:flex-row sm:items-center
