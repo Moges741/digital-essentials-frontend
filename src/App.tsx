@@ -21,6 +21,8 @@ import HomePage         from './pages/home/HomePage';
 import LoginPage        from './pages/auth/LoginPage';
 import RegisterPage     from './pages/auth/RegisterPage';
 import VerifyEmailPage  from './pages/auth/VerifyEmailPage';
+import ForgotPasswordPage from './pages/auth/ForgotPasswordPage';
+import ResetPasswordPage  from './pages/auth/ResetPasswordPage';
 import GoogleCallbackPage from './pages/auth/GoogleCallbackPage';
 import CoursesPage      from './pages/courses/CoursesPage';
 import CourseDetailPage from './pages/courses/CourseDetailPage';
@@ -87,6 +89,12 @@ const App = () => {
       } />
       <Route path="/verify-email" element={
         <PublicLayout><VerifyEmailPage /></PublicLayout>
+      } />
+      <Route path="/forgot-password" element={
+        <PublicLayout><ForgotPasswordPage /></PublicLayout>
+      } />
+      <Route path="/reset-password" element={
+        <PublicLayout><ResetPasswordPage /></PublicLayout>
       } />
       <Route path="/auth/google/callback" element={
         <PublicLayout><GoogleCallbackPage /></PublicLayout>
