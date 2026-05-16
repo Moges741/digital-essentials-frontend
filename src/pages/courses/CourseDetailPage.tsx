@@ -1,685 +1,518 @@
-
-import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useEffect, useMemo, useState } from 'react';
+import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import {
-  Clock, User, BookOpen, ChevronRight,
-  CheckCircle, Lock, Play, Globe, EyeOff,
-  Plus, Trash2, Edit,
-  ClipboardList,
+  BookCheck,
+  BookOpen,
+  CheckCircle2,
+  ChevronDown,
+  ChevronRight,
+  Clock3,
+  Globe,
+  Menu,
+  Search,
+  X,
 } from 'lucide-react';
-import { useCourse }                   from '../../hooks/useCourses';
-import { usePublishCourse, useDeleteCourse } from '../../hooks/useCourses';
-import { useIsEnrolled, useEnroll }    from '../../hooks/useEnrollment';
-import { useAuthStore }                from '../../store/auth.store';
-import Button                          from '../../components/ui/Button';
-import Badge, { StatusBadge }          from '../../components/ui/Badge';
-import Card                            from '../../components/ui/Card';
-import { PageSpinner }                 from '../../components/ui/Spinner';
-import EmptyState                      from '../../components/ui/EmptyState';
-import { ConfirmModal }                from '../../components/ui/Modal';
-import { ROLES }                       from '../../utils/constants';
-import { formatDate }                  from '../../utils/format';
-import { useState }                    from 'react';
-import { ChevronDown, ChevronUp } from 'lucide-react';
-import { useMaterials }          from '../../hooks/useMaterials';
-import LessonMaterials           from '../../components/lesson/LessonMaterials';
-import LessonMaterialUpload      from '../../components/lesson/LessonMaterialUpload';
-import { useForm }          from 'react-hook-form';
-import { zodResolver }      from '@hookform/resolvers/zod';
-import { z }                from 'zod';
-import { Star }             from 'lucide-react';
-import { useMyFeedback, useSubmitFeedback } from '../../hooks/useFeedback';
-import { Textarea }         from '../../components/ui/Input';
-const LessonItem = ({
-  lesson,
-  index,
-  courseId,
-  isEnrolled,
-  canManage,
-}: {
-  lesson:     { lesson_id: number; title: string; lesson_order: number };
-  index:      number;
-  courseId:   number;
-  isEnrolled: boolean;
-  canManage:  boolean;
-}) => {
-  const navigate              = useNavigate();
-  const [expanded, setExpanded] = useState(false);
-  const [showUpload, setShowUpload] = useState(false);
+import { useCourse, useDeleteCourse, usePublishCourse } from '../../hooks/useCourses';
+import { useEnroll, useIsEnrolled } from '../../hooks/useEnrollment';
+import { useLesson, useLessons } from '../../hooks/useLessons';
+import { useCourseProgress, useMarkComplete } from '../../hooks/useProgress';
+import { useAuthStore } from '../../store/auth.store';
+import { ROLES } from '../../utils/constants';
+import { formatDate } from '../../utils/format';
+import Button from '../../components/ui/Button';
+import Card from '../../components/ui/Card';
+import Badge, { StatusBadge } from '../../components/ui/Badge';
+import EmptyState from '../../components/ui/EmptyState';
+import { ConfirmModal } from '../../components/ui/Modal';
+import { PageSpinner } from '../../components/ui/Spinner';
+import LessonContent from '../../components/lesson/LessonContent';
 
-  // Only fetch materials when expanded and user can manage
-  const {
-    data: allMaterials,
-  } = useMaterials(courseId);
+interface ModuleGroup {
+  id: string;
+  title: string;
+  lessons: Array<{
+    lesson_id: number;
+    title: string;
+    lesson_order: number;
+  }>;
+}
 
-  // Filter materials for this specific lesson
-  const lessonMaterials = (allMaterials ?? []).filter(
-    (m) => m.lesson_id === lesson.lesson_id
-  );
+const buildLessonModules = (
+  lessons: Array<{ lesson_id: number; title: string; lesson_order: number }>
+): ModuleGroup[] => {
+  const sorted = [...lessons].sort((a, b) => a.lesson_order - b.lesson_order);
+  const byNamedPrefix = new Map<string, ModuleGroup>();
+  const unnamed: typeof sorted = [];
 
-  const isAccessible = isEnrolled || canManage;
+  sorted.forEach((lesson) => {
+    const match = lesson.title.match(/^([^:|-]{3,40})\s*[:|-]\s*(.+)$/);
+    if (!match) {
+      unnamed.push(lesson);
+      return;
+    }
 
-  return (
-    <div className="rounded-xl border border-gray-200 overflow-hidden">
+    const groupTitle = match[1].trim();
+    if (!byNamedPrefix.has(groupTitle)) {
+      byNamedPrefix.set(groupTitle, {
+        id: `module-${groupTitle.toLowerCase().replace(/\s+/g, '-')}`,
+        title: groupTitle,
+        lessons: [],
+      });
+    }
 
-      {/* Lesson row */}
-      <div
-        className={`
-          flex items-center gap-3 p-4
-          transition-all duration-150
-          ${isAccessible
-            ? 'hover:bg-gray-50 cursor-pointer'
-            : 'bg-gray-50 opacity-60 cursor-not-allowed'
-          }
-        `}
-        onClick={() => {
-          if (isAccessible && !canManage) {
-            navigate(
-              `/courses/${courseId}/lessons/${lesson.lesson_id}`
-            );
-          }
-        }}
-      >
-        {/* Number */}
-        <div className={`
-          w-7 h-7 rounded-full flex items-center justify-center
-          text-xs font-bold flex-shrink-0
-          ${isAccessible
-            ? 'bg-primary-100 text-primary-700'
-            : 'bg-gray-200 text-gray-400'
-          }
-        `}>
-          {index + 1}
-        </div>
-
-        {/* Title */}
-        <span className={`
-          text-sm font-medium flex-1
-          ${isAccessible ? 'text-gray-800' : 'text-gray-400'}
-        `}>
-          {lesson.title}
-        </span>
-
-        {/* Mentor actions */}
-        {canManage ? (
-          <div className="flex items-center gap-2"
-               onClick={(e) => e.stopPropagation()}>
-
-            {/* Material count badge */}
-            {lessonMaterials.length > 0 && (
-              <span className="text-xs text-gray-400">
-                {lessonMaterials.length} file
-                {lessonMaterials.length !== 1 ? 's' : ''}
-              </span>
-            )}
-
-            {/* View lesson */}
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() =>
-                navigate(
-                  `/courses/${courseId}/lessons/${lesson.lesson_id}`
-                )
-              }
-            >
-              <Play size={13} />
-            </Button>
-
-            {/* Edit lesson */}
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() =>
-                navigate(
-                  `/mentor/courses/${courseId}/lessons/${lesson.lesson_id}/edit`
-                )
-              }
-            >
-              <Edit size={13} />
-            </Button>
-
-            {/* Expand materials */}
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setExpanded((v) => !v)}
-              leftIcon={
-                expanded
-                  ? <ChevronUp size={14} />
-                  : <ChevronDown size={14} />
-              }
-            >
-              Materials
-            </Button>
-          </div>
-        ) : (
-          isAccessible
-            ? <Play size={14} className="text-primary-500" />
-            : <Lock size={14} className="text-gray-300" />
-        )}
-      </div>
-
-      {/* Expandable materials section — mentor only */}
-      {canManage && expanded && (
-        <div className="border-t border-gray-100 p-4
-                          bg-gray-50 flex flex-col gap-3">
-
-          {/* Existing materials */}
-          {lessonMaterials.length > 0 ? (
-            <LessonMaterials
-              materials={lessonMaterials}
-              course_id={courseId}
-            />
-          ) : (
-            <p className="text-xs text-gray-400 text-center py-2">
-              No materials uploaded for this lesson yet
-            </p>
-          )}
-
-          {/* Upload toggle */}
-          {showUpload ? (
-            <LessonMaterialUpload
-              course_id={courseId}
-              lesson_id={lesson.lesson_id}
-              onDone={() => setShowUpload(false)}
-            />
-          ) : (
-            <Button
-              variant="secondary"
-              size="sm"
-              leftIcon={<Plus size={14} />}
-              onClick={() => setShowUpload(true)}
-            >
-              Add Material
-            </Button>
-          )}
-        </div>
-      )}
-
-    </div>
-  );
-};
-// ── Feedback Section ──────────────────────────────────────────
-// Embedded inside CourseDetailPage
-// Only shown to enrolled learners
-// One submission per enrollment
-
-const feedbackSchema = z.object({
-  rating:   z.number().min(1, 'Please select a rating').max(5),
-  comments: z.string().optional(),
-});
-
-type FeedbackFormData = z.infer<typeof feedbackSchema>;
-
-const StarRating = ({
-  value,
-  onChange,
-}: {
-  value:    number;
-  onChange: (v: number) => void;
-}) => {
-  const [hovered, setHovered] = useState(0);
-
-  return (
-    <div className="flex items-center gap-1">
-      {[1, 2, 3, 4, 5].map((star) => (
-        <button
-          key={star}
-          type="button"
-          onClick={() => onChange(star)}
-          onMouseEnter={() => setHovered(star)}
-          onMouseLeave={() => setHovered(0)}
-          className="transition-transform hover:scale-110"
-        >
-          <Star
-            size={28}
-            className={`transition-colors ${
-              star <= (hovered || value)
-                ? 'fill-amber-400 text-amber-400'
-                : 'text-gray-300'
-            }`}
-          />
-        </button>
-      ))}
-      {value > 0 && (
-        <span className="ml-2 text-sm text-gray-500">
-          {['', 'Poor', 'Fair', 'Good', 'Very Good', 'Excellent'][value]}
-        </span>
-      )}
-    </div>
-  );
-};
-
-const FeedbackSection = ({
-  
-  enrollmentId,
-}: {
-  courseId:     number;
-  enrollmentId: number;
-}) => {
-  const { data: myFeedback } = useMyFeedback();
-  const { mutate: submit, isPending } = useSubmitFeedback();
-
-  // Check if learner already submitted feedback for this enrollment
-  const existingFeedback = myFeedback?.find(
-    (f) => f.enrollment_id === enrollmentId
-  );
-
-  const {
-    register,
-    handleSubmit,
-    setValue,
-    watch,
-    formState: { errors },
-  } = useForm<FeedbackFormData>({
-    resolver:      zodResolver(feedbackSchema),
-    defaultValues: { rating: 0 },
+    byNamedPrefix.get(groupTitle)?.lessons.push(lesson);
   });
 
-  const rating = watch('rating');
-
-  const onSubmit = (data: FeedbackFormData) => {
-    submit({
-      enrollment_id: enrollmentId,
-      rating:        data.rating,
-      comments:      data.comments,
+  const unnamedModules: ModuleGroup[] = [];
+  for (let i = 0; i < unnamed.length; i += 4) {
+    const slice = unnamed.slice(i, i + 4);
+    unnamedModules.push({
+      id: `module-${i / 4 + 1}`,
+      title: `Module ${i / 4 + 1}`,
+      lessons: slice,
     });
+  }
+
+  return [...byNamedPrefix.values(), ...unnamedModules].filter(
+    (module) => module.lessons.length > 0
+  );
+};
+
+const formatDuration = (mins: number) => {
+  if (!mins) return 'Self-paced';
+  const h = Math.floor(mins / 60);
+  const m = mins % 60;
+  return h > 0 ? (m > 0 ? `${h}h ${m}m` : `${h}h`) : `${m}m`;
+};
+
+const CourseDetailPage = () => {
+  const { course_id } = useParams<{ course_id: string }>();
+  const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const user = useAuthStore((state) => state.user);
+
+  const [lessonSearch, setLessonSearch] = useState('');
+  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [selectedLessonId, setSelectedLessonId] = useState<number | null>(null);
+  const [collapsedModules, setCollapsedModules] = useState<Record<string, boolean>>({});
+  const [lessonLoaded, setLessonLoaded] = useState(false);
+
+  const courseId = Number.parseInt(course_id ?? '0', 10);
+
+  const { data: course, isLoading: courseLoading, isError } = useCourse(courseId);
+  const { data: lessons = [], isLoading: lessonsLoading } = useLessons(courseId);
+  const { isEnrolled } = useIsEnrolled(courseId);
+  const { data: progress } = useCourseProgress(courseId);
+
+  const { mutate: enroll, isPending: enrolling } = useEnroll();
+  const { mutate: publish, isPending: publishing } = usePublishCourse(courseId);
+  const { mutate: deleteCourse, isPending: deleting } = useDeleteCourse();
+  const { mutate: markComplete, isPending: markingComplete } = useMarkComplete(courseId);
+
+  const isOwner = user?.user_id === course?.created_by;
+  const isAdmin = user?.role === ROLES.ADMINISTRATOR;
+  const canManage = isOwner || isAdmin;
+
+  const selectedLessonQueryId = Number.parseInt(searchParams.get('lesson') ?? '0', 10);
+
+  useEffect(() => {
+    if (lessons.length === 0) return;
+
+    const validLessonIds = new Set(lessons.map((lesson) => lesson.lesson_id));
+    const preferredId = validLessonIds.has(selectedLessonQueryId)
+      ? selectedLessonQueryId
+      : lessons[0].lesson_id;
+
+    setSelectedLessonId(preferredId);
+
+    if (!validLessonIds.has(selectedLessonQueryId)) {
+      const nextParams = new URLSearchParams(searchParams);
+      nextParams.set('lesson', String(preferredId));
+      setSearchParams(nextParams, { replace: true });
+    }
+  }, [lessons, selectedLessonQueryId, searchParams, setSearchParams]);
+
+  const { data: activeLesson, isLoading: activeLessonLoading } = useLesson(
+    courseId,
+    selectedLessonId ?? 0
+  );
+
+  const completedLessonIds = useMemo(() => {
+    return new Set(
+      (progress?.lessons ?? [])
+        .filter((lessonProgress) => lessonProgress.is_completed)
+        .map((lessonProgress) => lessonProgress.lesson_id)
+    );
+  }, [progress]);
+
+  const modules = useMemo(() => buildLessonModules(lessons), [lessons]);
+
+  const filteredModules = useMemo(() => {
+    const query = lessonSearch.toLowerCase().trim();
+    if (!query) return modules;
+
+    return modules
+      .map((module) => ({
+        ...module,
+        lessons: module.lessons.filter((lesson) =>
+          lesson.title.toLowerCase().includes(query)
+        ),
+      }))
+      .filter((module) => module.lessons.length > 0);
+  }, [lessonSearch, modules]);
+
+  const selectedIndex = lessons.findIndex((lesson) => lesson.lesson_id === selectedLessonId);
+  const prevLesson = selectedIndex > 0 ? lessons[selectedIndex - 1] : null;
+  const nextLesson = selectedIndex >= 0 ? lessons[selectedIndex + 1] ?? null : null;
+
+  const handleSelectLesson = (lessonId: number) => {
+    setSelectedLessonId(lessonId);
+    setMobileSidebarOpen(false);
+    if (!lessonLoaded) setLessonLoaded(true);
+
+    const nextParams = new URLSearchParams(searchParams);
+    nextParams.set('lesson', String(lessonId));
+    setSearchParams(nextParams, { replace: true });
   };
 
-  // Already submitted
-  if (existingFeedback) {
+  const handleMarkComplete = () => {
+    if (!selectedLessonId) return;
+    markComplete(selectedLessonId);
+  };
+
+  const toggleModule = (moduleId: string) => {
+    setCollapsedModules((current) => ({
+      ...current,
+      [moduleId]: !current[moduleId],
+    }));
+  };
+
+  if (courseLoading || lessonsLoading) return <PageSpinner />;
+
+  if (isError || !course) {
     return (
-      <Card padding="md">
-        <h2 className="text-base font-semibold text-gray-900 mb-3">
-          Your Feedback
-        </h2>
-        <div className="flex items-center gap-2 mb-2">
-          {[1, 2, 3, 4, 5].map((star) => (
-            <Star
-              key={star}
-              size={20}
-              className={
-                star <= existingFeedback.rating
-                  ? 'fill-amber-400 text-amber-400'
-                  : 'text-gray-200'
-              }
-            />
-          ))}
-          <span className="text-sm text-gray-500 ml-1">
-            {existingFeedback.rating}/5
-          </span>
-        </div>
-        {existingFeedback.comments && (
-          <p className="text-sm text-gray-600 italic">
-            "{existingFeedback.comments}"
-          </p>
-        )}
-        <p className="text-xs text-gray-400 mt-2">
-          Submitted {formatDate(existingFeedback.submitted_at)}
-        </p>
-      </Card>
+      <div className="mt-16 flex min-h-[calc(100vh-64px)] items-center justify-center px-4">
+        <EmptyState
+          title="Course not found"
+          description="This course may have been removed or is not yet published."
+          action={{ label: 'Browse Courses', onClick: () => navigate('/courses') }}
+        />
+      </div>
     );
   }
 
   return (
-    <Card padding="md">
-      <h2 className="text-base font-semibold text-gray-900 mb-4">
-        Leave Feedback
-      </h2>
-      <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
+    <>
+      <div className="mt-16 bg-gradient-to-br from-slate-50 via-white to-blue-50/50">
+        <div className="mx-auto max-w-[1440px] px-4 py-4 sm:px-6 lg:px-8">
+          {!lessonLoaded && (
+          <header className="mb-4 rounded-2xl border border-slate-200 bg-white/80 p-4 shadow-sm backdrop-blur sm:p-5">
+            <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+              <nav className="flex items-center gap-2 text-sm text-slate-500">
+                <Link to="/courses" className="transition hover:text-blue-700">
+                  Courses
+                </Link>
+                <ChevronRight size={14} />
+                <span className="max-w-[260px] truncate font-medium text-slate-900">
+                  {course.title}
+                </span>
+              </nav>
 
-        <div className="flex flex-col gap-1.5">
-          <label className="text-sm font-medium text-gray-700">
-            Rating <span className="text-red-500">*</span>
-          </label>
-          <StarRating
-            value={rating}
-            onChange={(v) => setValue('rating', v, { shouldValidate: true })}
-          />
-          {errors.rating && (
-            <p className="text-xs text-red-600">⚠ {errors.rating.message}</p>
-          )}
-        </div>
-
-        <Textarea
-          label="Comments (optional)"
-          placeholder="Share your experience with this course..."
-          {...register('comments')}
-        />
-
-        <Button
-          type="submit"
-          isLoading={isPending}
-          size="md"
-        >
-          Submit Feedback
-        </Button>
-
-      </form>
-    </Card>
-  );
-};
-const CourseDetailPage = () => {
-  const { course_id }           = useParams<{ course_id: string }>();
-  const navigate                = useNavigate();
-  const user                    = useAuthStore((state) => state.user);
-  const [showDelete, setShowDelete] = useState(false);
-
-  const courseId = parseInt(course_id ?? '0', 10);
-
-  const { data: course, isLoading, isError } = useCourse(courseId);
-  const { isEnrolled, enrollment }           = useIsEnrolled(courseId);
-  const { mutate: enroll, isPending: enrolling } = useEnroll();
-  const { mutate: publish, isPending: publishing } = usePublishCourse(courseId);
-  const { mutate: deleteCourse, isPending: deleting } = useDeleteCourse();
-
-  const isOwner = user?.user_id === course?.created_by;
-  const isAdmin = user?.role === ROLES.ADMINISTRATOR;
-//   const isMentor = user?.role === ROLES.MENTOR;
-  const canManage = isOwner || isAdmin;
-
-  const formatDuration = (mins: number) => {
-    if (!mins) return 'Self-paced';
-    const h = Math.floor(mins / 60);
-    const m = mins % 60;
-    return h > 0 ? (m > 0 ? `${h}h ${m}m` : `${h}h`) : `${m}m`;
-  };
-
-  // ── Loading ─────────────────────────────────────────────
-  if (isLoading) return <PageSpinner />;
-
-  // ── Error / Not found ──────────────────────────────────
-  if (isError || !course) return (
-    <div className="min-h-[calc(100vh-64px)] flex items-center justify-center">
-      <EmptyState
-        title="Course not found"
-        description="This course may have been removed or is not yet published."
-        action={{ label: 'Browse Courses', onClick: () => navigate('/courses') }}
-      />
-    </div>
-  );
-
-  const lessons = course.lessons ?? [];
-
-  return (
-    <div className="mt-16 max-w-5xl mx-auto px-4 py-10">
-
-      {/* Breadcrumb */}
-      <nav className="flex items-center gap-2 text-sm text-gray-500 mb-6">
-        <Link to="/courses" className="hover:text-primary-600 transition-colors">
-          Courses
-        </Link>
-        <ChevronRight size={14} />
-        <span className="text-gray-800 font-medium truncate">
-          {course.title}
-        </span>
-      </nav>
-
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-
-        {/* ── Left column — course info ──────────────────── */}
-        <div className="lg:col-span-2 flex flex-col gap-6">
-
-          {/* Course header */}
-          <div>
-            {/* Status badge */}
-            <div className="flex items-center gap-2 mb-3">
-              <StatusBadge status={course.is_published ? 'published' : 'draft'} />
-              {canManage && !course.is_published && (
-                <Badge variant="warning">Only visible to you</Badge>
-              )}
-            </div>
-
-            <h1 className="text-2xl font-bold text-gray-900 leading-snug mb-3">
-              {course.title}
-            </h1>
-
-            <p className="text-gray-600 leading-relaxed mb-4">
-              {course.description}
-            </p>
-
-            {/* Meta */}
-            <div className="flex flex-wrap items-center gap-4 text-sm text-gray-500">
-              <span className="flex items-center gap-1.5">
-                <User size={15} />
-                {course.creator_name}
-              </span>
-              <span className="flex items-center gap-1.5">
-                <Clock size={15} />
-                {formatDuration(course.duration_mins)}
-              </span>
-              <span className="flex items-center gap-1.5">
-                <BookOpen size={15} />
-                {lessons.length} lesson{lessons.length !== 1 ? 's' : ''}
-              </span>
-              <span className="text-xs text-gray-400">
-                Created {formatDate(course.created_at)}
-              </span>
-            </div>
-          </div>
-
-          {/* Mentor controls */}
-          {canManage && (
-            <Card padding="md" className="border-amber-200 bg-amber-50">
-              <p className="text-xs font-semibold text-amber-700 mb-3">
-                Course Management
-              </p>
-              <div className="flex flex-wrap gap-2">
+              <div className="flex items-center gap-2">
                 <Button
                   variant="secondary"
                   size="sm"
-                  isLoading={publishing}
-                  leftIcon={course.is_published ? <EyeOff size={14} /> : <Globe size={14} />}
-                  onClick={() => publish(!course.is_published)}
+                  className="lg:hidden"
+                  leftIcon={<Menu size={14} />}
+                  onClick={() => setMobileSidebarOpen(true)}
                 >
-                  {course.is_published ? 'Unpublish' : 'Publish'}
+                  Lessons
                 </Button>
-                <Link to={`/mentor/courses/create?edit=${course.course_id}`}>
-                  <Button variant="secondary" size="sm">
-                    Edit Course
-                  </Button>
-                </Link>
-                {isAdmin && (
+                {isEnrolled && lessons.length > 0 && selectedLessonId && (
                   <Button
-                    variant="danger"
                     size="sm"
-                    leftIcon={<Trash2 size={14} />}
-                    onClick={() => setShowDelete(true)}
+                    leftIcon={<BookCheck size={14} />}
+                    onClick={() => handleSelectLesson(selectedLessonId)}
                   >
-                    Delete
+                    Continue learning
                   </Button>
                 )}
-                {canManage && (
-  <Link to={`/mentor/courses/${courseId}/exam`}>
-    <Button variant="secondary" size="sm"
-            leftIcon={<ClipboardList size={14} />}>
-      Manage Exam
-    </Button>
-  </Link>
-)}
               </div>
-            </Card>
-          )}
+            </div>
 
-          {/* Lesson list */}
-          <div>
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-base font-semibold text-gray-900">
-                Course Content
-              </h2>
+            <div className="flex flex-wrap items-start justify-between gap-4">
+              <div>
+                <div className="mb-2 flex items-center gap-2">
+                  <StatusBadge status={course.is_published ? 'published' : 'draft'} />
+                  {canManage && !course.is_published && (
+                    <Badge variant="warning">Only visible to you</Badge>
+                  )}
+                </div>
+                <h1 className="mb-2 text-2xl font-extrabold tracking-tight text-slate-900 sm:text-3xl">
+                  {course.title}
+                </h1>
+                <p className="max-w-3xl text-sm leading-relaxed text-slate-600 sm:text-[15px]">
+                  {course.description}
+                </p>
+                <div className="mt-3 flex flex-wrap items-center gap-3 text-xs text-slate-500 sm:text-sm">
+                  <span className="inline-flex items-center gap-1.5">
+                    <Clock3 size={14} />
+                    {formatDuration(course.duration_mins)}
+                  </span>
+                  <span className="inline-flex items-center gap-1.5">
+                    <BookOpen size={14} />
+                    {lessons.length} lesson{lessons.length !== 1 ? 's' : ''}
+                  </span>
+                  <span>Created {formatDate(course.created_at)}</span>
+                </div>
+              </div>
+
               {canManage && (
-                <Link to={`/mentor/courses/${courseId}/lessons/create`}>
-                  <Button variant="ghost" size="sm" leftIcon={<Plus size={14} />}>
-                    Add Lesson
-                  </Button>
-                </Link>
+                <Card padding="sm" className="min-w-[220px] border-amber-200 bg-amber-50">
+                  <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-amber-700">
+                    Mentor tools
+                  </p>
+                  <div className="flex flex-wrap gap-2">
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      isLoading={publishing}
+                      leftIcon={<Globe size={13} />}
+                      onClick={() => publish(!course.is_published)}
+                    >
+                      {course.is_published ? 'Unpublish' : 'Publish'}
+                    </Button>
+                    <Link to={`/mentor/courses/create?edit=${course.course_id}`}>
+                      <Button variant="secondary" size="sm">
+                        Edit
+                      </Button>
+                    </Link>
+                    {isAdmin && (
+                      <Button
+                        variant="danger"
+                        size="sm"
+                        onClick={() => setShowDeleteConfirm(true)}
+                      >
+                        Delete
+                      </Button>
+                    )}
+                  </div>
+                </Card>
               )}
             </div>
 
-        {/* Lesson list */}
-{lessons.length === 0 ? (
-  <EmptyState
-    title="No lessons yet"
-    description={
-      canManage
-        ? 'Add lessons to this course to get started'
-        : 'Lessons will appear here soon'
-    }
-  />
-) : (
-  <div className="flex flex-col gap-3">
-    {lessons.map((lesson, index) => (
-      <LessonItem
-        key={lesson.lesson_id}
-        lesson={lesson}
-        index={index}
-        courseId={courseId}
-        isEnrolled={isEnrolled}
-        canManage={canManage}
-      />
-    ))}
-  </div>
-)}
-<div className='pt-5'></div>
-{isEnrolled && enrollment && user?.role === ROLES.LEARNER && (
-  <FeedbackSection
-    courseId={courseId}
-    enrollmentId={enrollment.enrollment_id}
-  />
-)}
-          </div>
-
-        </div>
-
-        {/* ── Right column — enroll card ─────────────────── */}
-        <div className="lg:col-span-1">
-          <div className="sticky top-24">
-            <Card padding="md" className="flex flex-col gap-4">
-
-              {/* Already enrolled */}
-              {isEnrolled && enrollment ? (
-                <>
-                  <div className="flex items-center gap-2 text-green-700
-                                   bg-green-50 rounded-lg px-3 py-2">
-                    <CheckCircle size={16} />
-                    <span className="text-sm font-medium">
-                      You are enrolled
-                    </span>
-                  </div>
-                  <Badge variant="neutral" className="self-start">
-                    Status: {enrollment.status}
-                  </Badge>
-                  {lessons.length > 0 && (
-                    <Button
-                      fullWidth
-                      onClick={() =>
-                        navigate(
-                          `/courses/${courseId}/lessons/${lessons[0].lesson_id}`
-                        )
-                      }
-                      leftIcon={<Play size={16} />}
-                    >
-                      Continue Learning
-                    </Button>
-                  )}
-                  {(enrollment as { status?: string })?.status === 'exam_pending' && (
-                    <div className="flex flex-col gap-3">
-                      <div className="flex items-center gap-2 bg-amber-50
-                                       border border-amber-200 rounded-lg px-3 py-2">
-                        <ClipboardList size={16} className="text-amber-600" />
-                        <span className="text-sm font-medium text-amber-700">
-                          Final exam required
-                        </span>
-                      </div>
-                      <Button
-                        fullWidth
-                        size="lg"
-                        onClick={() => navigate(`/courses/${courseId}/exam`)}
-                        leftIcon={<ClipboardList size={16} />}
-                      >
-                        Take Final Exam
-                      </Button>
-                    </div>
-                  )}
-                </>
-              ) : user?.role === ROLES.LEARNER ? (
-                <>
-                  <p className="text-sm text-gray-600">
-                    Enroll to access all lessons and track your progress.
-                  </p>
-                  <Button
-                    fullWidth
-                    size="lg"
-                    isLoading={enrolling}
-                    onClick={() => enroll({ course_id: courseId })}
-                    disabled={!course.is_published}
-                  >
-                    {enrolling ? 'Enrolling...' : 'Enroll Now'}
-                  </Button>
-                  {!course.is_published && (
-                    <p className="text-xs text-center text-gray-400">
-                      This course is not published yet
-                    </p>
-                  )}
-                </>
-              ) : !user ? (
-                <>
-                  <p className="text-sm text-gray-600">
-                    Create a free account to enroll in this course.
-                  </p>
-                  <Link to="/register">
-                    <Button fullWidth size="lg">
-                      Get Started Free
-                    </Button>
-                  </Link>
-                  <Link to="/login" className="text-center">
-                    <Button variant="ghost" fullWidth size="sm">
-                      Already have an account?
-                    </Button>
-                  </Link>
-                </>
-              ) : (
-                // Mentor or admin viewing
-                <p className="text-sm text-gray-500 text-center">
-                  You are the course {isOwner ? 'creator' : 'administrator'}.
-                </p>
-              )}
-
-              {/* Course stats */}
-              <div className="border-t border-gray-100 pt-4 flex flex-col gap-2">
-                <div className="flex justify-between text-sm">
-                  <span className="text-gray-500">Lessons</span>
-                  <span className="font-medium">{lessons.length}</span>
+            {isEnrolled && progress && (
+              <div className="mt-4 overflow-hidden rounded-xl border border-slate-200 bg-slate-50">
+                <div className="h-2 w-full bg-slate-100">
+                  <div
+                    className="h-full rounded-r-full bg-gradient-to-r from-blue-500 to-indigo-600 transition-all"
+                    style={{ width: `${progress.percentage}%` }}
+                  />
                 </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-gray-500">Duration</span>
-                  <span className="font-medium">
-                    {formatDuration(course.duration_mins)}
+                <div className="flex items-center justify-between px-3 py-2 text-xs text-slate-600 sm:text-sm">
+                  <span>
+                    Progress: {progress.completed_lessons}/{progress.total_lessons} lessons
                   </span>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-gray-500">Instructor</span>
-                  <span className="font-medium">{course.creator_name}</span>
+                  <span className="font-semibold text-slate-800">{Math.round(progress.percentage)}%</span>
                 </div>
               </div>
+            )}
+          </header>
+          )}
 
-            </Card>
+          <div className="relative flex gap-6">
+            <aside
+              className={`fixed inset-y-0 left-0 z-50 w-[86%] max-w-[360px] transform border-r border-slate-200 bg-white shadow-xl transition-transform duration-300 lg:sticky lg:top-24 lg:z-10 lg:h-[calc(100vh-7rem)] lg:w-[320px] lg:max-w-none lg:translate-x-0 lg:rounded-2xl lg:border lg:shadow-sm ${
+                mobileSidebarOpen ? 'translate-x-0' : '-translate-x-full'
+              }`}
+            >
+              <div className="flex h-full flex-col">
+                <div className="border-b border-slate-200 p-4">
+                  <div className="mb-3 flex items-center justify-between">
+                    <div>
+                      <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                        Learning workspace
+                      </p>
+                      <h2 className="line-clamp-2 text-base font-semibold text-slate-900">
+                        {course.title}
+                      </h2>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setMobileSidebarOpen(false)}
+                      className="rounded-md p-1 text-slate-500 transition hover:bg-slate-100 lg:hidden"
+                      aria-label="Close lessons panel"
+                    >
+                      <X size={18} />
+                    </button>
+                  </div>
+
+                  <div className="relative">
+                    <Search className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={14} />
+                    <input
+                      value={lessonSearch}
+                      onChange={(event) => setLessonSearch(event.target.value)}
+                      placeholder="Search lessons"
+                      className="w-full rounded-lg border border-slate-200 bg-slate-50 py-2 pl-9 pr-3 text-sm outline-none transition focus:border-blue-300 focus:bg-white"
+                    />
+                  </div>
+
+                  {isEnrolled && progress && (
+                    <p className="mt-3 text-xs text-slate-500">
+                      {Math.round(progress.percentage)}% complete
+                    </p>
+                  )}
+                </div>
+
+                <div className="flex-1 overflow-y-auto p-3">
+                  {filteredModules.length === 0 ? (
+                    <p className="rounded-lg border border-dashed border-slate-300 px-3 py-6 text-center text-sm text-slate-500">
+                      No lessons match your search.
+                    </p>
+                  ) : (
+                    <div className="space-y-2">
+                      {filteredModules.map((module) => {
+                        const collapsed = collapsedModules[module.id] ?? false;
+
+                        return (
+                          <div key={module.id} className="rounded-xl border border-slate-200 bg-slate-50/60">
+                            <button
+                              type="button"
+                              onClick={() => toggleModule(module.id)}
+                              className="flex w-full items-center justify-between px-3 py-2.5 text-left transition hover:bg-slate-100"
+                            >
+                              <span className="text-sm font-semibold text-slate-700">{module.title}</span>
+                              <ChevronDown
+                                size={14}
+                                className={`text-slate-500 transition-transform ${
+                                  collapsed ? '-rotate-90' : ''
+                                }`}
+                              />
+                            </button>
+
+                            {!collapsed && (
+                              <div className="space-y-1 px-2 pb-2">
+                                {module.lessons.map((lesson, index) => {
+                                  const completed = completedLessonIds.has(lesson.lesson_id);
+                                  const active = selectedLessonId === lesson.lesson_id;
+
+                                  return (
+                                    <button
+                                      key={lesson.lesson_id}
+                                      type="button"
+                                      onClick={() => handleSelectLesson(lesson.lesson_id)}
+                                      className={`group flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-left text-sm transition-all ${
+                                        active
+                                          ? 'bg-blue-600 text-white shadow-sm'
+                                          : 'text-slate-700 hover:bg-white hover:shadow-sm'
+                                      }`}
+                                    >
+                                      <span
+                                        className={`inline-flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full text-xs font-semibold ${
+                                          active
+                                            ? 'bg-white/20 text-white'
+                                            : 'bg-slate-200 text-slate-700 group-hover:bg-blue-100 group-hover:text-blue-700'
+                                        }`}
+                                      >
+                                        {index + 1}
+                                      </span>
+                                      <span className="flex-1 truncate">{lesson.title}</span>
+                                      {completed ? (
+                                        <CheckCircle2
+                                          size={14}
+                                          className={active ? 'text-white' : 'text-emerald-500'}
+                                        />
+                                      ) : (
+                                        <BookOpen
+                                          size={14}
+                                          className={active ? 'text-white/90' : 'text-slate-400'}
+                                        />
+                                      )}
+                                    </button>
+                                  );
+                                })}
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </aside>
+
+            {mobileSidebarOpen && (
+              <button
+                type="button"
+                className="fixed inset-0 z-40 bg-slate-900/35 lg:hidden"
+                aria-label="Close sidebar backdrop"
+                onClick={() => setMobileSidebarOpen(false)}
+              />
+            )}
+
+            <main className="min-w-0 flex-1 pb-10">
+              {!isEnrolled && user?.role === ROLES.LEARNER ? (
+                <Card padding="lg" className="rounded-2xl border-slate-200 bg-white shadow-sm">
+                  <h2 className="mb-2 text-xl font-bold text-slate-900">Unlock full course lessons</h2>
+                  <p className="mb-4 text-slate-600">
+                    Enroll to access the complete learning sidebar, track your progress, and save lesson completion automatically.
+                  </p>
+                  <Button
+                    size="lg"
+                    isLoading={enrolling}
+                    disabled={!course.is_published}
+                    onClick={() => enroll({ course_id: courseId })}
+                  >
+                    {enrolling ? 'Enrolling...' : 'Enroll now'}
+                  </Button>
+                </Card>
+              ) : lessons.length === 0 ? (
+                <EmptyState
+                  title="No lessons yet"
+                  description={canManage ? 'Add lessons to start building your course.' : 'Lessons will appear here soon.'}
+                  action={
+                    canManage
+                      ? {
+                          label: 'Create lesson',
+                          onClick: () => navigate(`/mentor/courses/${courseId}/lessons/create`),
+                        }
+                      : undefined
+                  }
+                />
+              ) : activeLessonLoading || !activeLesson ? (
+                <PageSpinner />
+              ) : (
+                <div key={activeLesson.lesson_id} className="animate-fade-in">
+                  <LessonContent
+                    courseId={courseId}
+                    lesson={activeLesson}
+                    lessonIndex={selectedIndex}
+                    totalLessons={lessons.length}
+                    isCompleted={completedLessonIds.has(activeLesson.lesson_id)}
+                    isMarkingComplete={markingComplete}
+                    onMarkComplete={handleMarkComplete}
+                    prevLesson={prevLesson}
+                    nextLesson={nextLesson}
+                    onGoToLesson={handleSelectLesson}
+                  />
+                </div>
+              )}
+            </main>
           </div>
         </div>
-
       </div>
 
-      {/* Delete confirm modal */}
       <ConfirmModal
-        isOpen={showDelete}
-        onClose={() => setShowDelete(false)}
+        isOpen={showDeleteConfirm}
+        onClose={() => setShowDeleteConfirm(false)}
         onConfirm={() => deleteCourse(courseId)}
         isLoading={deleting}
         title="Delete Course"
-        message={`Are you sure you want to delete "${course.title}"? This will permanently remove all lessons, enrollments, and progress data.`}
+        message={`Are you sure you want to delete "${course.title}"? This action cannot be undone.`}
       />
-
-    </div>
+    </>
   );
 };
 

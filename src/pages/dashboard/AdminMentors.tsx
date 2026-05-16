@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Search, Users, Award, Mail, Calendar, Edit2 } from 'lucide-react';
+import { Search, Users, Award, Mail, Edit2 } from 'lucide-react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 import { adminApi, type AdminMentor } from '../../api/admin.api';
@@ -129,7 +129,7 @@ const AdminMentors = () => {
                     </p>
                   </div>
                   <Badge
-                    variant={mentor.is_active ? 'success' : 'secondary'}
+                    variant={mentor.is_active ? 'success' : 'neutral'}
                     size="sm"
                   >
                     {mentor.is_active ? 'Active' : 'Inactive'}

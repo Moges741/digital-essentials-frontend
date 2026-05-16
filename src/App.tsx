@@ -40,6 +40,7 @@ import MentorDashboard  from './pages/dashboard/MentorDashboard';
 import CreateCoursePage from './pages/courses/CreateCoursePage';
 import CreateLessonPage from './pages/lessons/CreateLessonPage';
 import EditLessonPage   from './pages/lessons/EditLessonPage';
+import CreateMaterialPage from './pages/materials/CreateMaterialPage';
 import ExamBuilderPage from './pages/exam/ExamBuilderPage';
 import FinalExamPage   from './pages/exam/FinalExamPage';
 import ExamResultPage  from './pages/exam/ExamResultPage';
@@ -146,6 +147,9 @@ const App = () => {
           } />
           <Route path="/mentor/courses/:course_id/lessons/create" element={
             <AuthLayout><CreateLessonPage /></AuthLayout>
+          } />
+          <Route path="/mentor/courses/:course_id/materials/create" element={
+            <AuthLayout><CreateMaterialPage /></AuthLayout>
           } />
           <Route path="/mentor/courses/:course_id/lessons/:lesson_id/edit" element={
             <AuthLayout><EditLessonPage /></AuthLayout>
