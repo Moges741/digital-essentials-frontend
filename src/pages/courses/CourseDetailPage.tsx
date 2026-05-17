@@ -192,7 +192,7 @@ const CourseDetailPage = () => {
 
   if (isError || !course) {
     return (
-      <div className="mt-16 flex min-h-[calc(100vh-64px)] items-center justify-center px-4">
+      <div className="mt-20 flex min-h-[calc(100vh-64px)] items-center justify-center px-4">
         <EmptyState
           title="Course not found"
           description="This course may have been removed or is not yet published."
