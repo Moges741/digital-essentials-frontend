@@ -1,10 +1,19 @@
-
-
 import { useNavigate } from 'react-router-dom';
-import { Clock, BookOpen, User, ChevronRight, Star } from 'lucide-react';
+import {
+  Clock,
+  BookOpen,
+  User,
+  ChevronRight,
+  Star,
+} from 'lucide-react';
+
 import Card from '../ui/Card';
 import { StatusBadge } from '../ui/Badge';
-import type { Course } from '../../types/course.types';
+
+import type {
+  Course,
+} from '../../types/course.types';
+
 import { useAuthStore } from '../../store/auth.store';
 import { ROLES } from '../../utils/constants';
 
@@ -14,22 +23,28 @@ interface CourseCardProps {
 
 const CourseCard = ({ course }: CourseCardProps) => {
   const navigate = useNavigate();
-  const user     = useAuthStore((state) => state.user);
+
+  const user = useAuthStore((state) => state.user);
 
   const isMentorOrAdmin =
-    user?.role === ROLES.MENTOR || user?.role === ROLES.ADMINISTRATOR;
+    user?.role === ROLES.MENTOR ||
+    user?.role === ROLES.ADMINISTRATOR;
 
   // Convert minutes to readable format
   const formatDuration = (mins: number): string => {
     if (!mins) return 'Self-paced';
-    if (mins < 60) return `${mins} min`;
+
+    if (mins < 60) {
+      return `${mins} min`;
+    }
+
     const h = Math.floor(mins / 60);
     const m = mins % 60;
+
     return m > 0 ? `${h}h ${m}m` : `${h}h`;
   };
 
-
-  // Demo: random color for illustration (replace with course image/cover if available)
+  // Random gradient color
   const colorList = [
     'from-blue-500 to-blue-700',
     'from-green-500 to-green-700',
@@ -38,61 +53,116 @@ const CourseCard = ({ course }: CourseCardProps) => {
     'from-yellow-500 to-yellow-600',
     'from-indigo-500 to-indigo-700',
   ];
+
   const colorIdx = course.course_id % colorList.length;
+
   const colorClass = colorList[colorIdx];
 
   return (
     <Card
       hover
       padding="none"
-      onClick={() => navigate(`/courses/${course.course_id}`)}
-      className="flex flex-col overflow-hidden group shadow-lg rounded-2xl border border-gray-100 bg-white transition-transform duration-200 hover:scale-[1.025] hover:shadow-2xl cursor-pointer min-h-[320px]"
-      style={{ minHeight: 320 }}
+      onClick={() =>
+        navigate(`/courses/${course.course_id}`)
+      }
+      className="group flex min-h-[320px] cursor-pointer flex-col overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-lg transition-transform duration-200 hover:scale-[1.025] hover:shadow-2xl"
     >
-      {/* Visual header (could be replaced with image/cover) */}
-      <div className={`h-24 w-full bg-gradient-to-r ${colorClass} flex items-center justify-center relative`}> 
-        <BookOpen size={38} className="text-white/80 drop-shadow-lg" />
+      {/* Header */}
+      <div
+        className={`relative flex h-24 w-full items-center justify-center bg-gradient-to-r ${colorClass}`}
+      >
+        <BookOpen
+          size={38}
+          className="text-white/80 drop-shadow-lg"
+        />
+
         {isMentorOrAdmin && (
-          <div className="absolute top-3 right-3">
-            <StatusBadge status={course.is_published ? 'published' : 'draft'} />
+          <div className="absolute right-3 top-3">
+            <StatusBadge
+              status={
+                course.is_published
+                  ? 'published'
+                  : 'draft'
+              }
+            />
           </div>
         )}
       </div>
 
-      <div className="p-6 flex flex-col flex-1 gap-4">
+      {/* Content */}
+      <div className="flex flex-1 flex-col gap-4 p-6">
+
+        {/* Topic & Target Roles Label */}
+        {(course.topic || (course.target_roles && course.target_roles.length > 0)) && (
+          <div className="flex flex-wrap items-center gap-1.5">
+            {course.topic && (
+              <span className="inline-flex items-center rounded-full bg-primary-100 px-2.5 py-0.5 text-xs font-semibold text-primary-800 drop-shadow-sm">
+                {course.topic}
+              </span>
+            )}
+            
+            {course.target_roles && course.target_roles.length > 0 && (
+              <>
+                <span className="text-xs font-medium italic text-gray-500">for</span>
+                <div className="flex flex-wrap gap-1">
+                  {course.target_roles.map((role) => (
+                    <span 
+                      key={role} 
+                      className="inline-flex items-center text-xs font-medium text-gray-700 bg-gray-100 px-2 py-0.5 rounded-full capitalize"
+                    >
+                      {role}
+                    </span>
+                  ))}
+                </div>
+              </>
+            )}
+          </div>
+        )}
+
         {/* Title */}
-        <h3 className="text-lg font-bold text-gray-900 leading-tight group-hover:text-primary-700 transition-colors line-clamp-2">
+        <h3 className="line-clamp-2 text-lg font-bold leading-tight text-gray-900 transition-colors group-hover:text-primary-700">
           {course.title}
         </h3>
 
         {/* Description */}
-        <p className="text-base text-gray-600 leading-relaxed line-clamp-3 flex-1">
+        <p className="line-clamp-3 flex-1 text-base leading-relaxed text-gray-600">
           {course.description}
         </p>
 
-        {/* Meta info */}
-        <div className="flex items-center gap-6 text-sm text-gray-500 pt-2 border-t border-gray-100">
+        {/* Meta */}
+        <div className="flex items-center gap-6 border-t border-gray-100 pt-2 text-sm text-gray-500">
+
           <span className="flex items-center gap-2">
             <User size={15} />
-            <span className="font-medium">{course.creator_name}</span>
+
+            <span className="font-medium">
+              {course.creator_name}
+            </span>
           </span>
+
           <span className="flex items-center gap-2">
             <Clock size={15} />
-            <span>{formatDuration(course.duration_mins)}</span>
+
+            <span>
+              {formatDuration(course.duration_mins)}
+            </span>
           </span>
         </div>
 
-        {/* Action row */}
-        <div className="flex items-center justify-between mt-2">
-          <span className="text-sm font-semibold text-primary-600 group-hover:text-primary-700 flex items-center gap-1">
+        {/* Footer */}
+        <div className="mt-2 flex items-center justify-between">
+
+          <span className="flex items-center gap-1 text-sm font-semibold text-primary-600 group-hover:text-primary-700">
             View course
+
             <ChevronRight size={16} />
           </span>
-          {/* Optionally, show a rating or tag */}
-          <span className="flex items-center gap-1 text-yellow-500 text-xs font-medium">
+
+          <span className="flex items-center gap-1 text-xs font-medium text-yellow-500">
             <Star size={15} className="-ml-0.5" />
             4.8
           </span>
+
         </div>
       </div>
     </Card>

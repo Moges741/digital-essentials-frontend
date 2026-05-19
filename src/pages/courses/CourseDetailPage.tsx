@@ -19,6 +19,7 @@ import { useCourseProgress, useMarkComplete } from '../../hooks/useProgress';
 import { useAuthStore } from '../../store/auth.store';
 import { ROLES } from '../../utils/constants';
 import { formatDate } from '../../utils/format';
+import type { CourseCategory } from '../../types/course.types';
 import Button from '../../components/ui/Button';
 import Card from '../../components/ui/Card';
 import Badge, { StatusBadge } from '../../components/ui/Badge';
@@ -83,6 +84,15 @@ const formatDuration = (mins: number) => {
   const h = Math.floor(mins / 60);
   const m = mins % 60;
   return h > 0 ? (m > 0 ? `${h}h ${m}m` : `${h}h`) : `${m}m`;
+};
+
+const getCategoryColor = (category: CourseCategory): { bg: string; text: string } => {
+  const categoryMap: Record<CourseCategory, { bg: string; text: string }> = {
+    'Basics': { bg: 'bg-green-100', text: 'text-green-700' },
+    'Intermediate': { bg: 'bg-blue-100', text: 'text-blue-700' },
+    'Advanced': { bg: 'bg-purple-100', text: 'text-purple-700' },
+  };
+  return categoryMap[category];
 };
 
 const CourseDetailPage = () => {
@@ -204,7 +214,30 @@ const CourseDetailPage = () => {
 
   return (
     <>
-      <div className="mt-16 bg-gradient-to-br from-slate-50 via-white to-blue-50/50">
+              {!lessonLoaded && course && (course.category === "Intermediate" || course.category === "Advanced") && (
+          <div className="bg-gradient-to-r from-amber-50 to-orange-50 border-b border-amber-200">
+            <div className="mx-auto max-w-[1440px] px-4 py-8 sm:px-6 lg:px-8">
+              <div className="flex items-start shadow-sm border border-amber-200 bg-white p-6 rounded-2xl">
+                <div className="flex-shrink-0 pt-0.5">
+                  <BookCheck size={28} className="text-amber-500" />
+                </div>
+                <div className="ml-5">
+                  <h3 className="text-lg font-bold text-gray-900 mb-1">
+                    Level up your skills with this {course.category} course
+                  </h3>
+                  <p className="text-gray-600 leading-relaxed text-sm">
+                    To get the most out of this material, we strongly recommend learning the basics of <span className="font-semibold text-gray-800">{course.topic || "this subject"}</span>. Having foundational knowledge will help you understand and apply these concepts much better!
+                  </p>
+                    <Link to={`/courses?topic=${encodeURIComponent(course.topic || "")}&search=`} className="inline-flex mt-4 items-center gap-1 px-3 py-1.5 rounded-full bg-amber-100 text-sm font-semibold text-amber-700 hover:bg-amber-200 transition-colors">
+                    Explore basic {course.topic} courses <ChevronRight size={14} />
+                  </Link>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        <div className={course && (course.category === "Intermediate" || course.category === "Advanced") ? "bg-gradient-to-br from-slate-50 via-white to-blue-50/50" : "mt-16 bg-gradient-to-br from-slate-50 via-white to-blue-50/50"}>
         <div className="mx-auto max-w-[1440px] px-4 py-4 sm:px-6 lg:px-8">
           {!lessonLoaded && (
           <header className="mb-4 rounded-2xl border border-slate-200 bg-white/80 p-4 shadow-sm backdrop-blur sm:p-5">
@@ -219,26 +252,41 @@ const CourseDetailPage = () => {
                 </span>
               </nav>
 
-              <div className="flex items-center gap-2">
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  className="lg:hidden"
-                  leftIcon={<Menu size={14} />}
-                  onClick={() => setMobileSidebarOpen(true)}
-                >
-                  Lessons
-                </Button>
-                {isEnrolled && lessons.length > 0 && selectedLessonId && (
-                  <Button
-                    size="sm"
-                    leftIcon={<BookCheck size={14} />}
-                    onClick={() => handleSelectLesson(selectedLessonId)}
-                  >
-                    Continue learning
-                  </Button>
-                )}
-              </div>
+        <div className="flex items-center gap-2">
+  <Button
+    variant="secondary"
+    size="sm"
+    className="lg:hidden"
+    leftIcon={<Menu size={14} />}
+    onClick={() => setMobileSidebarOpen(true)}
+  >
+    Lessons
+  </Button>
+
+  {isEnrolled && lessons.length > 0 && selectedLessonId && (
+    <>
+      <Button
+        size="sm"
+        leftIcon={<BookCheck size={14} />}
+        onClick={() => handleSelectLesson(selectedLessonId)}
+      >
+        Continue learning
+      </Button>
+
+      {course.category && (
+        <span
+          className={`rounded-full px-2.5 py-1 text-xs font-semibold ${
+            getCategoryColor(course.category as CourseCategory).bg
+          } ${
+            getCategoryColor(course.category as CourseCategory).text
+          }`}
+        >
+          {course.category}
+        </span>
+      )}
+    </>
+  )}
+</div>
             </div>
 
             <div className="flex flex-wrap items-start justify-between gap-4">

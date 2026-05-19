@@ -1,13 +1,35 @@
-
 import { useNavigate }   from 'react-router-dom';
-import { useForm }       from 'react-hook-form';
+import { useForm, Controller }       from 'react-hook-form';
 import { zodResolver }   from '@hookform/resolvers/zod';
 import { z }             from 'zod';
 import { ArrowLeft }     from 'lucide-react';
 import { useCreateCourse } from '../../hooks/useCourses';
+import type { CourseTopic, TargetRole } from '../../types/course.types';
 import Input, { Textarea } from '../../components/ui/Input';
+import Select from '../../components/ui/Select';
 import Button              from '../../components/ui/Button';
 import Card                from '../../components/ui/Card';
+
+const TOPICS: CourseTopic[] = [
+  'AI',
+  'IoT',
+  'Cloud Computing',
+  'Cyber Security',
+  'Safety Issue',
+  'Software Development & Coding',
+  'Digital Marketing',
+  'E-Commerce',
+];
+
+const TARGET_ROLES: TargetRole[] = [
+  'teacher',
+  'doctor',
+  'student',
+  'farmer',
+  'merchant',
+  'professional',
+  'general',
+];
 
 // ── Zod schema ────────────────────────────────────────────────
 const createCourseSchema = z.object({
@@ -18,6 +40,32 @@ const createCourseSchema = z.object({
   description: z
     .string()
     .min(10, 'Description must be at least 10 characters'),
+  category: z
+    .enum(['Basics', 'Intermediate', 'Advanced'])
+    ,
+  topic: z
+    .enum([
+      'AI',
+      'IoT',
+      'Cloud Computing',
+      'Cyber Security',
+      'Safety Issue',
+      'Software Development & Coding',
+      'Digital Marketing',
+      'E-Commerce',
+    ])
+    ,
+  target_roles: z
+    .array(z.enum([
+      'teacher',
+      'doctor',
+      'student',
+      'farmer',
+      'merchant',
+      'professional',
+      'general',
+    ]))
+    .min(1, 'Select at least one target role'),
   duration_mins: z
     .number({ error: 'Duration must be a number' })
     .min(0, 'Duration cannot be negative')
@@ -33,16 +81,25 @@ const CreateCoursePage = () => {
   const {
     register,
     handleSubmit,
+    control,
     formState: { errors },
   } = useForm<CreateCourseFormData>({
     resolver:      zodResolver(createCourseSchema),
-    defaultValues: { duration_mins: undefined },
+    defaultValues: { 
+      duration_mins: undefined, 
+      category: 'Basics',
+      topic: 'Software Development & Coding',
+      target_roles: ['student'],
+    },
   });
 
   const onSubmit = (data: CreateCourseFormData) => {
     createCourse({
       title:         data.title,
       description:   data.description,
+      category:      data.category,
+      topic:         data.topic,
+      target_roles:  data.target_roles,
       duration_mins: data.duration_mins,
     });
   };
@@ -90,49 +147,97 @@ const CreateCoursePage = () => {
             {...register('description')}
           />
 
+          <Select
+            label="Course Category"
+            error={errors.category?.message}
+            helperText="Select the difficulty level for this course"
+            required
+            options={[
+              { value: 'Basics', label: 'Basics — Beginner level' },
+              { value: 'Intermediate', label: 'Intermediate — Intermediate level' },
+              { value: 'Advanced', label: 'Advanced — Advanced level' },
+            ]}
+            {...register('category')}
+          />
+
+          <Select
+            label="Course Topic"
+            error={errors.topic?.message}
+            helperText="Select the subject area or domain for this course"
+            required
+            options={TOPICS.map((topic) => ({ value: topic, label: topic }))}
+            {...register('topic')}
+          />
+
+          {/* Target Roles */}
+          <div>
+            <label className="text-sm font-medium text-gray-700 block mb-3">
+              Target Audience
+              <span className="text-red-500 ml-1">*</span>
+            </label>
+            <p className="text-xs text-gray-500 mb-3">
+              Who is this course designed for? Select all that apply.
+            </p>
+            <Controller
+              control={control}
+              name="target_roles"
+              render={({ field }) => (
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                  {TARGET_ROLES.map((role) => (
+                    <label
+                      key={role}
+                      className="flex items-center gap-2 p-3 rounded-lg border border-gray-300 
+                                 cursor-pointer hover:bg-gray-50 transition-colors"
+                    >
+                      <input
+                        type="checkbox"
+                        checked={field.value?.includes(role) || false}
+                        onChange={(e) => {
+                          const current = field.value || [];
+                          const updated = e.target.checked
+                            ? [...current, role]
+                            : current.filter((r) => r !== role);
+                          field.onChange(updated);
+                        }}
+                        className="rounded border-gray-300 w-4 h-4 text-primary-600 focus:ring-primary-500"
+                      />
+                      <span className="text-sm font-medium text-gray-700 capitalize">
+                        {role}
+                      </span>
+                    </label>
+                  ))}
+                </div>
+              )}
+            />
+            {errors.target_roles?.message && (
+              <p className="text-sm text-red-500 mt-2">
+                {errors.target_roles.message}
+              </p>
+            )}
+          </div>
+
           <Input
-            label="Duration (minutes)"
+            label="Estimated Duration (minutes)"
             type="number"
             placeholder="e.g. 120"
             error={errors.duration_mins?.message}
-            helperText="Optional — total estimated time to complete"
             {...register('duration_mins', { valueAsNumber: true })}
           />
 
-          {/* Info box */}
-          <div className="bg-primary-50 border border-primary-200
-                           rounded-xl p-4 text-sm text-primary-700">
-            <p className="font-semibold mb-1">After creating:</p>
-            <ul className="list-disc list-inside flex flex-col gap-1
-                            text-primary-600 text-xs">
-              <li>Add lessons to your course</li>
-              <li>Upload materials (PDFs, videos, audio)</li>
-              <li>Create exercises and quizzes</li>
-              <li>Publish when you are ready for learners</li>
-            </ul>
-          </div>
-
-          {/* Actions */}
-          <div className="flex items-center justify-end gap-3 pt-2">
+          <div className="pt-4 flex justify-end gap-3 border-t border-gray-100">
             <Button
               type="button"
               variant="secondary"
               onClick={() => navigate(-1)}
-              disabled={isPending}
             >
               Cancel
             </Button>
-            <Button
-              type="submit"
-              isLoading={isPending}
-            >
-              {isPending ? 'Creating...' : 'Create Course'}
+            <Button type="submit" isLoading={isPending}>
+              Create Course
             </Button>
           </div>
-
         </form>
       </Card>
-
     </div>
   );
 };
