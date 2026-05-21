@@ -65,7 +65,7 @@ const Navbar = () => {
             )}
           </div>
 
-          {/* Right */}
+
           <div className="flex items-center gap-2">
             {isAuthenticated ? (
               <>

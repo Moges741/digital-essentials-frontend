@@ -15,6 +15,7 @@ const ApplyMentorPage = () => {
     phone_number: '',
     linkedin_link: '',
     github_link: '',
+    admin_email: '',
   });
 
   const [files, setFiles] = useState<{
@@ -50,6 +51,10 @@ const ApplyMentorPage = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (!formData.admin_email) {
+      toast.error("Please select an admin's email.");
+      return;
+    }
     if (!files.academic_file || !files.national_id) {
       toast.error('Please upload both academic file and national ID.');
       return;
@@ -59,6 +64,7 @@ const ApplyMentorPage = () => {
     data.append('name', formData.name);
     data.append('email', formData.email);
     data.append('phone_number', formData.phone_number);
+    data.append('admin_email', formData.admin_email);
     if (formData.linkedin_link) data.append('linkedin_link', formData.linkedin_link);
     if (formData.github_link) data.append('github_link', formData.github_link);
     data.append('academic_file', files.academic_file);
@@ -199,6 +205,27 @@ const ApplyMentorPage = () => {
                   value={formData.github_link}
                   onChange={handleChange}
                 />
+              </div>
+            </div>
+
+            {/* Admin Selection */}
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold text-gray-800 border-b pb-2">Select Admin for Review</h3>
+              <div className="flex flex-col gap-1.5">
+                <label className="text-sm font-medium text-gray-700">
+                  Select one of the following admin's email <span className="text-red-500">*</span>
+                </label>
+                <select
+                  name="admin_email"
+                  required
+                  value={formData.admin_email}
+                  onChange={(e) => setFormData((prev) => ({ ...prev, admin_email: e.target.value }))}
+                  className="w-full rounded-lg border border-gray-200 bg-slate-50 py-2.5 px-3 text-sm outline-none transition focus:border-blue-300 focus:bg-white"
+                >
+                  <option value="">-- Choose Admin Email --</option>
+                  <option value="mogesse741@gmail.com">mogesse741@gmail.com</option>
+                  <option value="softman741@gmail.com">softman741@gmail.com</option>
+                </select>
               </div>
             </div>
 
