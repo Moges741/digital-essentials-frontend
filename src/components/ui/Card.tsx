@@ -57,5 +57,9 @@ export const CardFooter = ({ children, className = '' }: { children: ReactNode; 
     {children}
   </div>
 );
-
+export const CardContent = ({ children, className = '' }: { children: ReactNode; className?: string }) => (
+  <div className={`p-4 ${className}`}>
+    {children}
+  </div>
+);
 export default Card;

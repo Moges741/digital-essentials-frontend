@@ -27,6 +27,7 @@ import GoogleCallbackPage from './pages/auth/GoogleCallbackPage';
 import CoursesPage      from './pages/courses/CoursesPage';
 import CourseDetailPage from './pages/courses/CourseDetailPage';
 import NotFoundPage     from './pages/NotFoundPage';
+import ApplyMentorPage  from './pages/home/ApplyMentorPage';
 
 // Learner pages
 import LearnerDashboard  from './pages/dashboard/LearnerDashboard';
@@ -51,6 +52,7 @@ import AdminPanel from './pages/dashboard/AdminPanel';
 import AdminUsers from './pages/dashboard/AdminUsers';
 import AdminCertificates from './pages/dashboard/AdminCertificates.tsx';
 import AdminMentors from './pages/dashboard/AdminMentors';
+import AdminMentorApplications from './pages/dashboard/AdminMentorApplications';
 
 // Shared pages
 import ChatPage from './pages/chat/ChatPage';
@@ -106,6 +108,9 @@ const App = () => {
       } />
       <Route path="/courses/:course_id" element={
         <PublicLayout><CourseDetailPage /></PublicLayout>
+      } />
+      <Route path="/apply-mentor" element={
+        <PublicLayout><ApplyMentorPage /></PublicLayout>
       } />
 
       {/* ── Protected (must be logged in) ──────────────── */}
@@ -193,6 +198,9 @@ const App = () => {
           } />
           <Route path="/admin/mentors" element={
             <AuthLayout><AdminMentors /></AuthLayout>
+          } />
+          <Route path="/admin/mentor-applications" element={
+            <AuthLayout><AdminMentorApplications /></AuthLayout>
           } />
         </Route>
 

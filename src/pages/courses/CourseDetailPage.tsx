@@ -7,6 +7,7 @@ import {
   ChevronDown,
   ChevronRight,
   Clock3,
+  ClipboardList,
   Globe,
   Menu,
   Search,
@@ -334,6 +335,11 @@ const CourseDetailPage = () => {
                     <Link to={`/mentor/courses/create?edit=${course.course_id}`}>
                       <Button variant="secondary" size="sm">
                         Edit
+                      </Button>
+                    </Link>
+                    <Link to={`/mentor/courses/${course.course_id}/exam`}>
+                      <Button variant="secondary" size="sm" leftIcon={<ClipboardList size={13} />}>
+                        Exam
                       </Button>
                     </Link>
                     {isAdmin && (

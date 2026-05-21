@@ -12,6 +12,7 @@ import {
   ChevronDown,
   ChevronUp,
   Star,
+  FilePen,
 } from 'lucide-react';
 import { useCourses, usePublishCourse } from '../../hooks/useCourses';
 import { useCourseFeedback } from '../../hooks/useFeedback';
@@ -96,6 +97,17 @@ const CourseRow = ({ course }: { course: any }) => {
           >
             View
           </Button>
+
+          {(isOwner || isAdmin) && (
+            <Button
+              variant="ghost"
+              size="sm"
+              leftIcon={<FilePen size={13} />}
+              onClick={() => navigate(`/mentor/courses/${course.course_id}/exam`)}
+            >
+              Create Exam
+            </Button>
+          )}
 
           {(isOwner || isAdmin) && (
             <Button

@@ -4,7 +4,7 @@ import {
   LayoutDashboard, BookOpen,
   BarChart2, Award, MessageCircle,
   PlusCircle, Users, Settings, ScrollText,
-  BookMarked, LogOut, ChevronLeft, ChevronRight
+  BookMarked, LogOut, ChevronLeft, ChevronRight, FileText
 } from 'lucide-react';
 import { useAuthStore } from '../../store/auth.store';
 import { useUIStore } from '../../store/ui.store';
@@ -124,6 +124,11 @@ const adminNav: NavGroup[] = [
         label: 'Manage Certificates',
         to:    '/admin/certificates',
         icon:  <ScrollText size={17} />,
+      },
+      {
+        label: 'Mentor Applications',
+        to:    '/admin/mentor-applications',
+        icon:  <FileText size={17} />,
       },
        {
         label :'Mentors',
