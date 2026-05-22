@@ -17,6 +17,7 @@ import {
 import { useAuthStore } from '../../store/auth.store';
 import Button from '../ui/Button';
 import LessonMaterials from './LessonMaterials';
+import FeedbackForm from './FeedbackForm';
 import type { LessonWithMaterials } from '../../types/lesson.types';
 
 type LessonNavItem = {
@@ -359,6 +360,13 @@ const LessonContent = ({
 						<div className="mt-8 border-t border-slate-100 pt-6">
 							<h2 className="mb-4 text-lg font-semibold text-slate-900">Materials</h2>
 							<LessonMaterials materials={lesson.materials as any} course_id={courseId} />
+						</div>
+					)}
+
+					{/* Feedback: only show after final lesson is completed */}
+					{isFinalLesson && isCompleted && (
+						<div className="mt-6">
+							<FeedbackForm courseId={courseId} />
 						</div>
 					)}
 
