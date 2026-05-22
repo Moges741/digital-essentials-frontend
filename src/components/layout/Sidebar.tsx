@@ -8,7 +8,7 @@ import {
 } from 'lucide-react';
 import { useAuthStore } from '../../store/auth.store';
 import { useUIStore } from '../../store/ui.store';
-import { RoleBadge }    from '../ui/Badge';
+import { RoleBadge } from '../ui/Badge';
 import toast            from 'react-hot-toast';
 
 interface NavItem {
@@ -281,11 +281,13 @@ const Sidebar = () => {
           </div>
           {sidebarOpen && (
             <div className="flex-1 min-w-0 transition-opacity duration-300">
-              <p className="text-xs font-semibold text-gray-800 truncate
-                              leading-tight">
-                {user?.name}
+              <p className="text-xs font-semibold text-gray-800 truncate leading-tight">
+                {user?.username}
               </p>
-              <div className="mt-0.5">
+              <p className="mt-0.5 text-[11px] text-gray-500 truncate leading-tight">
+                {user?.email}
+              </p>
+              <div className="mt-1">
                 <RoleBadge role={user?.role ?? ''} />
               </div>
             </div>

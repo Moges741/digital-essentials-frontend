@@ -168,6 +168,7 @@ const LessonContent = ({
 	const navigate = useNavigate();
 	const user = useAuthStore((s) => s.user);
 	const isLearner = user?.role === 'learner';
+	const isFinalLesson = lessonIndex === totalLessons - 1;
 	const articleRef = useRef<HTMLElement | null>(null);
 	const [readingProgress, setReadingProgress] = useState(0);
 	const [activeHeadingId, setActiveHeadingId] = useState<string>('');
@@ -374,7 +375,7 @@ const LessonContent = ({
 										Previous
 									</Button>
 
-									{isCompleted ? (
+									{isCompleted && isFinalLesson ? (
 										<Button
 											variant="success"
 											size="md"
@@ -382,6 +383,14 @@ const LessonContent = ({
 											onClick={() => navigate(`/courses/${courseId}/exam`)}
 										>
 											Take exam
+										</Button>
+									) : isCompleted ? (
+										<Button
+											variant="secondary"
+											size="md"
+											disabled
+										>
+											Mark as complete
 										</Button>
 									) : (
 										<Button
@@ -435,7 +444,7 @@ const LessonContent = ({
 					)}
 					{isLearner && (
 						<>
-							{isCompleted && (
+								{isCompleted && isFinalLesson && (
 								<div className="mt-4 space-y-2 rounded-lg border border-emerald-200 bg-emerald-50 p-3">
 									<p className="text-sm font-semibold text-emerald-900">Lesson complete!</p>
 									<Button
@@ -449,7 +458,7 @@ const LessonContent = ({
 									</Button>
 								</div>
 							)}
-							{!isCompleted && (
+								{!isCompleted && (
 								<div className="mt-4 rounded-lg bg-gradient-to-br from-blue-50 to-indigo-50 p-3 text-sm text-slate-700">
 									<p className="mb-1 font-semibold">Continue learning</p>
 									<p className="mb-3 text-xs text-slate-600">
@@ -467,6 +476,14 @@ const LessonContent = ({
 									</Button>
 								</div>
 							)}
+								{isCompleted && !isFinalLesson && (
+									<div className="mt-4 rounded-lg bg-slate-50 p-3 text-sm text-slate-600">
+										<p className="mb-1 font-semibold text-slate-700">Lesson completed</p>
+										<p className="text-xs text-slate-500">
+											Finish the remaining lessons to unlock the exam.
+										</p>
+									</div>
+								)}
 						</>
 					)}
 				</div>

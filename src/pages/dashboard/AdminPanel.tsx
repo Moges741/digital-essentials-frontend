@@ -3,7 +3,7 @@ import { useNavigate }    from 'react-router-dom';
 import {
   Users, BookOpen, GraduationCap,
   Shield, Eye, EyeOff,
-  MessageSquare,
+  MessageSquare, AlertTriangle,
 } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { adminApi }       from '../../api/admin.api';
@@ -14,6 +14,12 @@ import EmptyState        from '../../components/ui/EmptyState';
 import { PageSpinner }   from '../../components/ui/Spinner';
 import Modal             from '../../components/ui/Modal';
 import { formatDate }    from '../../utils/format';
+
+const seriesConfig = [
+  { key: 'enrollments', label: 'Enrollments', color: '#2563eb' },
+  { key: 'exam_submissions', label: 'Exam submissions', color: '#16a34a' },
+  { key: 'feedback_submissions', label: 'Feedback', color: '#f59e0b' },
+] as const;
 
 // ── Fetch all courses (admin only) ────────────────────────────
 const useAllCourses = () => {
@@ -39,6 +45,14 @@ const useAllFeedback = () => {
   });
 };
 
+// ── Fetch at-risk learners ───────────────────────────────────
+const useAtRiskLearners = () => {
+  return useQuery({
+    queryKey: ['admin', 'at-risk-learners'],
+    queryFn: adminApi.getAtRiskLearners,
+  });
+};
+
 // ── Stat card ─────────────────────────────────────────────────
 const StatCard = ({
   icon, label, value, color,
@@ -60,6 +74,103 @@ const StatCard = ({
   </Card>
 );
 
+const formatTrendLabel = (value: string): string => {
+  const date = new Date(`${value}-01T00:00:00Z`);
+  return new Intl.DateTimeFormat('en', { month: 'short', year: '2-digit' }).format(date);
+};
+
+const TrendChart = ({
+  labels,
+  series,
+}: {
+  labels: string[];
+  series: Array<{ label: string; color: string; values: number[] }>;
+}) => {
+  const width = 860;
+  const height = 260;
+  const padding = { top: 20, right: 20, bottom: 36, left: 44 };
+  const innerWidth = width - padding.left - padding.right;
+  const innerHeight = height - padding.top - padding.bottom;
+  const allValues = series.flatMap((item) => item.values);
+  const maxValue = Math.max(...allValues, 1);
+
+  const pointsFor = (values: number[]) => values
+    .map((value, index) => {
+      const x = padding.left + (labels.length <= 1 ? innerWidth / 2 : (index / (labels.length - 1)) * innerWidth);
+      const y = padding.top + innerHeight - (value / maxValue) * innerHeight;
+      return `${x},${y}`;
+    })
+    .join(' ');
+
+  return (
+    <div className="overflow-x-auto">
+      <svg viewBox={`0 0 ${width} ${height}`} className="w-full min-w-[720px] h-[260px]">
+        {[0.25, 0.5, 0.75, 1].map((tick) => {
+          const y = padding.top + innerHeight - innerHeight * tick;
+          return (
+            <g key={tick}>
+              <line x1={padding.left} y1={y} x2={width - padding.right} y2={y} stroke="#e5e7eb" strokeDasharray="4 4" />
+              <text x={padding.left - 8} y={y + 4} textAnchor="end" className="fill-gray-400 text-[10px]">
+                {Math.round(maxValue * tick)}
+              </text>
+            </g>
+          );
+        })}
+
+        {series.map((item) => (
+          <g key={item.label}>
+            <polyline
+              fill="none"
+              stroke={item.color}
+              strokeWidth="3"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              points={pointsFor(item.values)}
+            />
+            {item.values.map((value, index) => {
+              const x = padding.left + (labels.length <= 1 ? innerWidth / 2 : (index / (labels.length - 1)) * innerWidth);
+              const y = padding.top + innerHeight - (value / maxValue) * innerHeight;
+              return <circle key={`${item.label}-${index}`} cx={x} cy={y} r="4" fill={item.color} />;
+            })}
+          </g>
+        ))}
+
+        {labels.map((label, index) => {
+          const x = padding.left + (labels.length <= 1 ? innerWidth / 2 : (index / (labels.length - 1)) * innerWidth);
+          return (
+            <text
+              key={label}
+              x={x}
+              y={height - 12}
+              textAnchor="middle"
+              className="fill-gray-500 text-[11px]"
+            >
+              {formatTrendLabel(label)}
+            </text>
+          );
+        })}
+      </svg>
+
+      <div className="mt-4 flex flex-wrap gap-4">
+        {series.map((item) => (
+          <div key={item.label} className="flex items-center gap-2 text-sm text-gray-600">
+            <span className="w-3 h-3 rounded-full" style={{ backgroundColor: item.color }} />
+            <span>{item.label}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+const formatDaysLeft = (daysLeft: number, isOverdue: boolean): string => {
+  if (isOverdue) {
+    return `${Math.abs(daysLeft)} day${Math.abs(daysLeft) === 1 ? '' : 's'} overdue`;
+  }
+  if (daysLeft === 0) return 'Due today';
+  return `${daysLeft} day${daysLeft === 1 ? '' : 's'} left`;
+};
+
 // ── Main Admin Panel ────────────────────────────────────────────
 const AdminPanel = () => {
   const navigate               = useNavigate();
@@ -69,6 +180,11 @@ const AdminPanel = () => {
   const { data: users,   isLoading: usersLoading  } = useAllUsers();
   const { data: courses, isLoading: coursesLoading } = useAllCourses();
   const { data: feedback, isLoading: feedbackLoading } = useAllFeedback();
+  const { data: analytics, isLoading: analyticsLoading } = useQuery({
+    queryKey: ['admin', 'analytics'],
+    queryFn: adminApi.getDashboardAnalytics,
+  });
+  const { data: atRiskLearners, isLoading: atRiskLearnersLoading } = useAtRiskLearners();
 
   // Mutations
   const togglePublishMutation = useMutation({
@@ -79,12 +195,14 @@ const AdminPanel = () => {
     },
   });
 
-  const isLoading = usersLoading || coursesLoading || feedbackLoading;
+  const isLoading = usersLoading || coursesLoading || feedbackLoading || analyticsLoading || atRiskLearnersLoading;
   if (isLoading) return <PageSpinner />;
 
   const allUsers   = users   ?? [];
   const allCourses = courses ?? [];
   const allFeedback = feedback ?? [];
+  const dashboardAnalytics = analytics;
+  const riskLearners = atRiskLearners ?? [];
 
   // Stats
   const learners = allUsers.filter((u) => u.role === 'learner').length;
@@ -144,6 +262,22 @@ const AdminPanel = () => {
         />
       </div>
 
+      <Card padding="md">
+        <CardHeader>
+          <CardTitle>Trends Over Time</CardTitle>
+          <Badge variant="neutral">Last 6 months</Badge>
+        </CardHeader>
+
+        <TrendChart
+          labels={dashboardAnalytics?.trends.labels ?? []}
+          series={seriesConfig.map((item) => ({
+            label: item.label,
+            color: item.color,
+            values: dashboardAnalytics?.trends?.[item.key] ?? [],
+          }))}
+        />
+      </Card>
+
       {/* Management Shortcuts */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Card padding="md" className="flex flex-col items-center justify-center text-center cursor-pointer hover:shadow-md transition-shadow" onClick={() => navigate('/admin/mentors')}>
@@ -182,6 +316,63 @@ const AdminPanel = () => {
           >
             View All
           </Button>
+
+      <Card padding="md">
+        <CardHeader>
+          <CardTitle>At-Risk Learners</CardTitle>
+          <Badge variant="warning">Needs attention</Badge>
+        </CardHeader>
+
+        {riskLearners.length === 0 ? (
+          <EmptyState
+            icon={<AlertTriangle size={24} />}
+            title="No learners are currently at risk"
+            description="Learners close to deadlines or falling behind will appear here"
+          />
+        ) : (
+          <div className="space-y-3">
+            {riskLearners.map((learner) => (
+              <div
+                key={learner.enrollment_id}
+                className="flex flex-col gap-3 rounded-xl border border-gray-200 p-4 hover:bg-gray-50 transition-colors"
+              >
+                <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="font-semibold text-gray-900 truncate">{learner.learner_name}</p>
+                    <p className="text-sm text-gray-500 truncate">{learner.learner_email}</p>
+                    <p className="text-sm text-gray-700 mt-1 truncate">{learner.course_title}</p>
+                  </div>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <Badge variant={learner.is_overdue ? 'danger' : 'warning'}>
+                      {formatDaysLeft(learner.days_left, learner.is_overdue)}
+                    </Badge>
+                    <Badge variant="neutral">Risk {learner.risk_score}%</Badge>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-sm">
+                  <div>
+                    <p className="text-xs text-gray-500 uppercase tracking-wide">Progress</p>
+                    <p className="font-medium text-gray-900">{learner.progress_percent}%</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-500 uppercase tracking-wide">Lessons</p>
+                    <p className="font-medium text-gray-900">{learner.completed_lessons}/{learner.total_lessons}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-500 uppercase tracking-wide">Deadline</p>
+                    <p className="font-medium text-gray-900">{formatDate(learner.deadline)}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-500 uppercase tracking-wide">Status</p>
+                    <p className="font-medium text-gray-900 capitalize">{learner.status.replace('_', ' ')}</p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </Card>
         </CardHeader>
 
         {allCourses.length === 0 ? (

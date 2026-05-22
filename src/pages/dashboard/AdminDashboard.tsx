@@ -17,6 +17,13 @@ import { PageSpinner }    from '../../components/ui/Spinner';
 import Modal              from '../../components/ui/Modal';
 import { formatDate }     from '../../utils/format';
 import type { User }           from '../../types/auth.types';
+// import { adminApi }      from '../../api/admin.api';
+
+const seriesConfig = [
+  { key: 'enrollments', label: 'Enrollments', color: '#2563eb' },
+  { key: 'exam_submissions', label: 'Exam submissions', color: '#16a34a' },
+  { key: 'feedback_submissions', label: 'Feedback', color: '#f59e0b' },
+] as const;
 
 // ── Fetch all users (admin only) ──────────────────────────────
 const useAllUsers = () => {
@@ -31,6 +38,14 @@ const useAllCourses = () => {
   return useQuery({
     queryKey: ['admin', 'courses'],
     queryFn: adminApi.getAllCourses,
+  });
+};
+
+// ── Fetch dashboard analytics (admin only) ────────────────────
+const useDashboardAnalytics = () => {
+  return useQuery({
+    queryKey: ['admin', 'analytics'],
+    queryFn: adminApi.getDashboardAnalytics,
   });
 };
 
@@ -55,6 +70,95 @@ const StatCard = ({
   </Card>
 );
 
+const formatTrendLabel = (value: string): string => {
+  const date = new Date(`${value}-01T00:00:00Z`);
+  return new Intl.DateTimeFormat('en', { month: 'short', year: '2-digit' }).format(date);
+};
+
+const TrendChart = ({
+  labels,
+  series,
+}: {
+  labels: string[];
+  series: Array<{ label: string; color: string; values: number[] }>;
+}) => {
+  const width = 860;
+  const height = 260;
+  const padding = { top: 20, right: 20, bottom: 36, left: 44 };
+  const innerWidth = width - padding.left - padding.right;
+  const innerHeight = height - padding.top - padding.bottom;
+  const allValues = series.flatMap((item) => item.values);
+  const maxValue = Math.max(...allValues, 1);
+
+  const pointsFor = (values: number[]) => values
+    .map((value, index) => {
+      const x = padding.left + (labels.length <= 1 ? innerWidth / 2 : (index / (labels.length - 1)) * innerWidth);
+      const y = padding.top + innerHeight - (value / maxValue) * innerHeight;
+      return `${x},${y}`;
+    })
+    .join(' ');
+
+  return (
+    <div className="overflow-x-auto">
+      <svg viewBox={`0 0 ${width} ${height}`} className="w-full min-w-[720px] h-[260px]">
+        {[0.25, 0.5, 0.75, 1].map((tick) => {
+          const y = padding.top + innerHeight - innerHeight * tick;
+          return (
+            <g key={tick}>
+              <line x1={padding.left} y1={y} x2={width - padding.right} y2={y} stroke="#e5e7eb" strokeDasharray="4 4" />
+              <text x={padding.left - 8} y={y + 4} textAnchor="end" className="fill-gray-400 text-[10px]">
+                {Math.round(maxValue * tick)}
+              </text>
+            </g>
+          );
+        })}
+
+        {series.map((item) => (
+          <g key={item.label}>
+            <polyline
+              fill="none"
+              stroke={item.color}
+              strokeWidth="3"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              points={pointsFor(item.values)}
+            />
+            {item.values.map((value, index) => {
+              const x = padding.left + (labels.length <= 1 ? innerWidth / 2 : (index / (labels.length - 1)) * innerWidth);
+              const y = padding.top + innerHeight - (value / maxValue) * innerHeight;
+              return <circle key={`${item.label}-${index}`} cx={x} cy={y} r="4" fill={item.color} />;
+            })}
+          </g>
+        ))}
+
+        {labels.map((label, index) => {
+          const x = padding.left + (labels.length <= 1 ? innerWidth / 2 : (index / (labels.length - 1)) * innerWidth);
+          return (
+            <text
+              key={label}
+              x={x}
+              y={height - 12}
+              textAnchor="middle"
+              className="fill-gray-500 text-[11px]"
+            >
+              {formatTrendLabel(label)}
+            </text>
+          );
+        })}
+      </svg>
+
+      <div className="mt-4 flex flex-wrap gap-4">
+        {series.map((item) => (
+          <div key={item.label} className="flex items-center gap-2 text-sm text-gray-600">
+            <span className="w-3 h-3 rounded-full" style={{ backgroundColor: item.color }} />
+            <span>{item.label}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
 // ── Main Dashboard ────────────────────────────────────────────
 const AdminDashboard = () => {
   const navigate               = useNavigate();
@@ -68,6 +172,7 @@ const AdminDashboard = () => {
 
   const { data: users,   isLoading: usersLoading  } = useAllUsers();
   const { data: courses, isLoading: coursesLoading } = useAllCourses();
+  const { data: analytics, isLoading: analyticsLoading } = useDashboardAnalytics();
 
   // Mutations
   const updateRoleMutation = useMutation({
@@ -87,11 +192,12 @@ const AdminDashboard = () => {
     },
   });
 
-  const isLoading = usersLoading || coursesLoading;
+  const isLoading = usersLoading || coursesLoading || analyticsLoading;
   if (isLoading) return <PageSpinner />;
 
   const allUsers   = users   ?? [];
   const allCourses = courses ?? [];
+  const dashboardAnalytics = analytics;
 
   // Role counts
   const learners = allUsers.filter((u) => u.role === 'learner').length;
@@ -130,33 +236,21 @@ const AdminDashboard = () => {
         </div>
       </div>
 
-      {/* Stats */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard
-          icon={<Users size={20} className="text-primary-600" />}
-          label="Total Users"
-          value={allUsers.length}
-          color="bg-primary-50"
+      <Card padding="md">
+        <CardHeader>
+          <CardTitle>Trends Over Time</CardTitle>
+          <Badge variant="neutral">Last 6 months</Badge>
+        </CardHeader>
+
+        <TrendChart
+          labels={dashboardAnalytics?.trends.labels ?? []}
+          series={seriesConfig.map((item) => ({
+            label: item.label,
+            color: item.color,
+            values: dashboardAnalytics?.trends?.[item.key] ?? [],
+          }))}
         />
-        <StatCard
-          icon={<GraduationCap size={20} className="text-blue-600" />}
-          label="Learners"
-          value={learners}
-          color="bg-blue-50"
-        />
-        <StatCard
-          icon={<BookOpen size={20} className="text-green-600" />}
-          label="Total Courses"
-          value={allCourses.length}
-          color="bg-green-50"
-        />
-        <StatCard
-          icon={<Award size={20} className="text-amber-600" />}
-          label="Mentors"
-          value={mentors}
-          color="bg-amber-50"
-        />
-      </div>
+      </Card>
 
       {/* Users table */}
       <Card padding="md">
@@ -207,6 +301,81 @@ const AdminDashboard = () => {
               >
                 <div className="flex items-center gap-2">
                   {/* Avatar initial */}
+
+          {/* Stats */}
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            <StatCard
+              icon={<Users size={20} className="text-primary-600" />}
+              label="Total Users"
+              value={allUsers.length}
+              color="bg-primary-50"
+            />
+            <StatCard
+              icon={<GraduationCap size={20} className="text-blue-600" />}
+              label="Learners"
+              value={learners}
+              color="bg-blue-50"
+            />
+            <StatCard
+              icon={<BookOpen size={20} className="text-green-600" />}
+              label="Total Courses"
+              value={allCourses.length}
+              color="bg-green-50"
+            />
+            <StatCard
+              icon={<Award size={20} className="text-amber-600" />}
+              label="Mentors"
+              value={mentors}
+              color="bg-amber-50"
+            />
+          </div>
+
+          {/* Learning analytics */}
+          <Card padding="md">
+            <CardHeader>
+              <CardTitle>Learning Analytics</CardTitle>
+              <Badge variant="neutral">Live overview</Badge>
+            </CardHeader>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
+              <StatCard
+                icon={<GraduationCap size={20} className="text-blue-600" />}
+                label="Completion Rate"
+                value={`${dashboardAnalytics?.completion_rate ?? 0}%`}
+                color="bg-blue-50"
+              />
+              <StatCard
+                icon={<Award size={20} className="text-green-600" />}
+                label="Average Exam Score"
+                value={`${dashboardAnalytics?.average_exam_score ?? 0}%`}
+                color="bg-green-50"
+              />
+              <StatCard
+                icon={<Shield size={20} className="text-amber-600" />}
+                label="Exam Pass Rate"
+                value={`${dashboardAnalytics?.exam_pass_rate ?? 0}%`}
+                color="bg-amber-50"
+              />
+              <StatCard
+                icon={<BookOpen size={20} className="text-primary-600" />}
+                label="Average Feedback"
+                value={(dashboardAnalytics?.average_feedback_rating ?? 0).toFixed(1)}
+                color="bg-primary-50"
+              />
+              <StatCard
+                icon={<Users size={20} className="text-slate-600" />}
+                label="Active Learners"
+                value={dashboardAnalytics?.active_learners ?? 0}
+                color="bg-slate-50"
+              />
+              <StatCard
+                icon={<Award size={20} className="text-emerald-600" />}
+                label="Certificates Issued"
+                value={dashboardAnalytics?.certificates_issued ?? 0}
+                color="bg-emerald-50"
+              />
+            </div>
+          </Card>
                   <div className="w-8 h-8 rounded-full bg-primary-100
                                     flex items-center justify-center
                                     flex-shrink-0">

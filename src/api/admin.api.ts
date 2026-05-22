@@ -51,6 +51,45 @@ export interface UpdateMentorProfileBody {
   qualifications?: string;
 }
 
+export interface AdminDashboardAnalytics {
+  total_users: number;
+  total_courses: number;
+  total_enrollments: number;
+  completed_enrollments: number;
+  active_learners: number;
+  certificates_issued: number;
+  average_feedback_rating: number;
+  average_exam_score: number;
+  completion_rate: number;
+  exam_pass_rate: number;
+  trends: {
+    labels: string[];
+    enrollments: number[];
+    exam_submissions: number[];
+    feedback_submissions: number[];
+  };
+}
+
+export interface AtRiskLearner {
+  enrollment_id: number;
+  user_id: number;
+  learner_name: string;
+  learner_email: string;
+  course_id: number;
+  course_title: string;
+  enrollment_date: string;
+  deadline: string;
+  total_lessons: number;
+  completed_lessons: number;
+  progress_percent: number;
+  remaining_ratio: number;
+  days_left: number;
+  risk_score: number;
+  is_overdue: boolean;
+  status: 'active' | 'exam_pending' | 'completed' | 'dropped';
+  is_at_risk: boolean;
+}
+
 // ─── Admin API functions ──────────────────────────────────────
 
 export const adminApi = {
@@ -58,6 +97,18 @@ export const adminApi = {
   getAllUsers: async (): Promise<User[]> => {
     const res = await apiClient.get<ApiResponse<{ users: User[] }>>('/admin/users');
     return res.data.data.users;
+  },
+
+  // Get dashboard analytics
+  getDashboardAnalytics: async (): Promise<AdminDashboardAnalytics> => {
+    const res = await apiClient.get<ApiResponse<{ analytics: AdminDashboardAnalytics }>>('/admin/analytics');
+    return res.data.data.analytics;
+  },
+
+  // Get at-risk learners
+  getAtRiskLearners: async (): Promise<AtRiskLearner[]> => {
+    const res = await apiClient.get<ApiResponse<{ learners: AtRiskLearner[] }>>('/admin/at-risk-learners');
+    return res.data.data.learners;
   },
 
   // Update user role

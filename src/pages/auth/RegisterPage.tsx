@@ -21,8 +21,8 @@ const registerSchema = z.object({
     .max(100, 'First name must not exceed 100 characters')
     .regex(/^[a-zA-Z\s-]+$/, 'First name can only contain letters, spaces, and hyphens'),
   middle_name: z.string()
-    .regex(/^[a-zA-Z\s-]*$/, 'Middle name can only contain letters, spaces, and hyphens')
-    .optional(),
+    .min(1, 'Middle name is required')
+    .regex(/^[a-zA-Z\s-]*$/, 'Middle name can only contain letters, spaces, and hyphens'),
   last_name: z.string()
     .min(2, 'Last name must be at least 2 characters')
     .max(100, 'Last name must not exceed 100 characters')
@@ -96,12 +96,13 @@ const RegisterPage = () => {
               />
 
               <Input
-                label="Middle name (optional)"
+                label="Middle name"
                 type="text"
                 placeholder="Middle name"
                 leftIcon={<User size={16} />}
                 error={errors.middle_name?.message}
                 autoComplete="additional-name"
+                required
                 {...registerField('middle_name')}
               />
             </div>
