@@ -4,7 +4,7 @@ import { zodResolver }   from '@hookform/resolvers/zod';
 import { z }             from 'zod';
 import { ArrowLeft, Clock } from 'lucide-react';
 import { useCreateCourse } from '../../hooks/useCourses';
-import type { CourseTopic, TargetRole, TimeLimitUnit } from '../../types/course.types';
+import type { CourseTopic, TargetRole } from '../../types/course.types';
 import Input, { Textarea } from '../../components/ui/Input';
 import Select from '../../components/ui/Select';
 import Button              from '../../components/ui/Button';
@@ -108,16 +108,23 @@ const CreateCoursePage = () => {
   const watchedTimeLimitValue = watch('time_limit_value');
 
   const onSubmit = (data: CreateCourseFormData) => {
-    createCourse({
-      title:             data.title,
-      description:       data.description,
-      category:          data.category,
-      topic:             data.topic,
-      target_roles:      data.target_roles,
-      duration_mins:     data.duration_mins,
-      time_limit_value:  data.time_limit_value ?? null,
-      time_limit_unit:   (data.time_limit_unit as TimeLimitUnit) ?? null,
-    });
+    // Build FormData to allow optional thumbnail file
+    const form = new FormData();
+    form.append('title', data.title);
+    form.append('description', data.description);
+    form.append('category', data.category);
+    form.append('topic', data.topic);
+    form.append('target_roles', JSON.stringify(data.target_roles));
+    if (data.duration_mins !== undefined && data.duration_mins !== null) form.append('duration_mins', String(data.duration_mins));
+    if (data.time_limit_value !== undefined && data.time_limit_value !== null) form.append('time_limit_value', String(data.time_limit_value));
+    if (data.time_limit_unit) form.append('time_limit_unit', data.time_limit_unit as string);
+    // Thumbnail file input (if present in DOM)
+    const thumbInput = document.querySelector<HTMLInputElement>('#thumbnail-input');
+    if (thumbInput && thumbInput.files && thumbInput.files.length > 0) {
+      form.append('thumbnail', thumbInput.files[0]);
+    }
+
+    createCourse(form as unknown as CreateCourseFormData);
   };
 
   return (
@@ -184,6 +191,13 @@ const CreateCoursePage = () => {
             options={TOPICS.map((topic) => ({ value: topic, label: topic }))}
             {...register('topic')}
           />
+
+          {/* Thumbnail upload */}
+          <div>
+            <label className="text-sm font-medium text-gray-700 block mb-2">Course Thumbnail (optional)</label>
+            <input id="thumbnail-input" type="file" accept="image/*" className="text-sm text-gray-600" />
+            <p className="text-xs text-gray-500 mt-1">Recommended: 1200x400 or similar wide banner for best appearance.</p>
+          </div>
 
           {/* Target Roles */}
           <div>

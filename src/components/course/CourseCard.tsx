@@ -57,6 +57,7 @@ const CourseCard = ({ course }: CourseCardProps) => {
   const colorIdx = course.course_id % colorList.length;
 
   const colorClass = colorList[colorIdx];
+  const targetRoles = Array.isArray(course.target_roles) ? course.target_roles : [];
 
   return (
     <Card
@@ -65,16 +66,27 @@ const CourseCard = ({ course }: CourseCardProps) => {
       onClick={() =>
         navigate(`/courses/${course.course_id}`)
       }
-      className="group flex min-h-[320px] cursor-pointer flex-col overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-lg transition-transform duration-200 hover:scale-[1.025] hover:shadow-2xl"
+      className="group flex w-full min-h-[360px] cursor-pointer flex-col overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-lg transition-transform duration-200 hover:scale-[1.02] hover:shadow-2xl"
     >
       {/* Header */}
-      <div
-        className={`relative flex h-24 w-full items-center justify-center bg-gradient-to-r ${colorClass}`}
-      >
-        <BookOpen
-          size={38}
-          className="text-white/80 drop-shadow-lg"
-        />
+      <div className={`relative flex h-32 w-full items-center justify-center bg-gradient-to-r sm:h-40 ${colorClass}`}>
+        {course.thumbnail_url ? (
+          <img
+            src={course.thumbnail_url}
+            alt={course.title}
+            loading="lazy"
+            className="absolute inset-0 h-full w-full object-cover"
+          />
+        ) : (
+          <BookOpen
+            size={44}
+            className="text-white/80 drop-shadow-lg"
+            aria-hidden
+          />
+        )}
+
+        {/* subtle overlay to ensure contrast */}
+        <div className="absolute inset-0 bg-black/10" />
 
         {isMentorOrAdmin && (
           <div className="absolute right-3 top-3">
@@ -90,10 +102,10 @@ const CourseCard = ({ course }: CourseCardProps) => {
       </div>
 
       {/* Content */}
-      <div className="flex flex-1 flex-col gap-4 p-6">
+      <div className="flex flex-1 flex-col gap-5 p-6 sm:p-7">
 
         {/* Topic & Target Roles Label */}
-        {(course.topic || (course.target_roles && course.target_roles.length > 0)) && (
+        {(course.topic || targetRoles.length > 0) && (
           <div className="flex flex-wrap items-center gap-1.5">
             {course.topic && (
               <span className="inline-flex items-center rounded-full bg-primary-100 px-2.5 py-0.5 text-xs font-semibold text-primary-800 drop-shadow-sm">
@@ -101,11 +113,11 @@ const CourseCard = ({ course }: CourseCardProps) => {
               </span>
             )}
             
-            {course.target_roles && course.target_roles.length > 0 && (
+            {targetRoles.length > 0 && (
               <>
                 <span className="text-xs font-medium italic text-gray-500">for</span>
                 <div className="flex flex-wrap gap-1">
-                  {course.target_roles.map((role) => (
+                  {targetRoles.map((role) => (
                     <span 
                       key={role} 
                       className="inline-flex items-center text-xs font-medium text-gray-700 bg-gray-100 px-2 py-0.5 rounded-full capitalize"
@@ -120,12 +132,12 @@ const CourseCard = ({ course }: CourseCardProps) => {
         )}
 
         {/* Title */}
-        <h3 className="line-clamp-2 text-lg font-bold leading-tight text-gray-900 transition-colors group-hover:text-primary-700">
+        <h3 className="line-clamp-2 text-xl font-bold leading-tight text-gray-900 transition-colors group-hover:text-primary-700">
           {course.title}
         </h3>
 
         {/* Description */}
-        <p className="line-clamp-3 flex-1 text-base leading-relaxed text-gray-600">
+        <p className="line-clamp-3 flex-1 text-[15px] leading-relaxed text-gray-600">
           {course.description}
         </p>
 

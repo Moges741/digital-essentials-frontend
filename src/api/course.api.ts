@@ -41,19 +41,19 @@ export const courseApi = {
   // POST /api/courses
   // mentor, admin only
   create: async (body: CreateCourseBody): Promise<Course> => {
-    const res = await apiClient.post<ApiResponse<{ course: Course }>>(
-      '/courses',
-      body
-    );
+    const config = body instanceof FormData ? { headers: { 'Content-Type': 'multipart/form-data' } } : undefined;
+    const res = await apiClient.post<ApiResponse<{ course: Course }>>('/courses', body as any, config);
     return res.data.data.course;
   },
 
   // PATCH /api/courses/:course_id
   // mentor (own), admin
   update: async (course_id: number, body: UpdateCourseBody): Promise<Course> => {
+    const config = body instanceof FormData ? { headers: { 'Content-Type': 'multipart/form-data' } } : undefined;
     const res = await apiClient.patch<ApiResponse<{ course: Course }>>(
       `/courses/${course_id}`,
-      body
+      body as any,
+      config
     );
     return res.data.data.course;
   },

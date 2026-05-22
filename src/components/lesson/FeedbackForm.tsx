@@ -28,7 +28,7 @@ const FeedbackForm = ({ courseId }: Props) => {
     mutationFn: (body: { enrollment_id: number; rating: number; comments?: string }) =>
       feedbackApi.create(body),
     onSuccess: () => {
-      queryClient.invalidateQueries(['feedback']);
+      queryClient.invalidateQueries({ queryKey: ['feedback'] });
       toast.success('Thanks for your feedback!');
       setSubmitted(true);
     },
@@ -85,7 +85,7 @@ const FeedbackForm = ({ courseId }: Props) => {
       />
 
       <div className="mt-3 flex items-center gap-2">
-        <Button variant="primary" size="sm" isLoading={mutation.isLoading} onClick={handleSubmit}>
+        <Button variant="primary" size="sm" isLoading={mutation.isPending} onClick={handleSubmit}>
           Submit feedback
         </Button>
         <Button variant="ghost" size="sm" onClick={() => { setComments(''); setRating(5); }}>

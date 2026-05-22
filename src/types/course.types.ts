@@ -20,6 +20,8 @@ export interface Course {
   course_id:    number;
   title:        string;
   description:  string;
+  /** Optional thumbnail URL for course cards and previews */
+  thumbnail_url?: string | null;
   duration_mins: number;
   category:     CourseCategory;
   topic:        CourseTopic;
