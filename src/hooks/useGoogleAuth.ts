@@ -18,8 +18,10 @@ export const useGoogleLogin = () => {
       const user = {
         user_id: payload.user_id,
         name: payload.name,
+        username: payload.username,
         email: payload.email,
         role: payload.role,
+        must_change_password: payload.must_change_password,
         is_active: true,
         created_at: '',
         updated_at: '',

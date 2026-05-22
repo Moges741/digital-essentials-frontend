@@ -313,6 +313,12 @@ const CourseDetailPage = () => {
                     <BookOpen size={14} />
                     {lessons.length} lesson{lessons.length !== 1 ? 's' : ''}
                   </span>
+                  {course.time_limit_value && course.time_limit_unit && (
+                    <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-100 px-2.5 py-0.5 text-amber-700 font-medium">
+                      <Clock3 size={13} />
+                      {course.time_limit_value} {course.time_limit_unit}(s) limit
+                    </span>
+                  )}
                   <span>Created {formatDate(course.created_at)}</span>
                 </div>
               </div>

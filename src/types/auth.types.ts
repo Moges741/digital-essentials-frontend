@@ -5,8 +5,10 @@ export type Role = 'learner' | 'mentor' | 'administrator';
 export interface User {
   user_id:    number;
   name:       string;
+  username:   string;
   email:      string;
   role:       Role;
+  must_change_password: boolean;
   is_active:  boolean;
   email_verified?: boolean;
   created_at: string;
@@ -23,14 +25,15 @@ export interface RegisterResponse {
 }
 
 export interface LoginBody {
-  email:    string;
+  username: string;
   password: string;
 }
 
 export interface RegisterBody {
-  name:            string;
+  first_name:      string;
+  middle_name?:    string;
+  last_name:       string;
   email:           string;
-  password:        string;
   role:            Role;
   specialization?: string;
   qualifications?: string;

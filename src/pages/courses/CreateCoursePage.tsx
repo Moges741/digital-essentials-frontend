@@ -2,9 +2,9 @@ import { useNavigate }   from 'react-router-dom';
 import { useForm, Controller }       from 'react-hook-form';
 import { zodResolver }   from '@hookform/resolvers/zod';
 import { z }             from 'zod';
-import { ArrowLeft }     from 'lucide-react';
+import { ArrowLeft, Clock } from 'lucide-react';
 import { useCreateCourse } from '../../hooks/useCourses';
-import type { CourseTopic, TargetRole } from '../../types/course.types';
+import type { CourseTopic, TargetRole, TimeLimitUnit } from '../../types/course.types';
 import Input, { Textarea } from '../../components/ui/Input';
 import Select from '../../components/ui/Select';
 import Button              from '../../components/ui/Button';
@@ -70,6 +70,15 @@ const createCourseSchema = z.object({
     .number({ error: 'Duration must be a number' })
     .min(0, 'Duration cannot be negative')
     .optional(),
+  time_limit_value: z
+    .number({ error: 'Must be a number' })
+    .min(1, 'Must be at least 1')
+    .optional()
+    .nullable(),
+  time_limit_unit: z
+    .enum(['minute', 'hour', 'day', 'week', 'month'])
+    .optional()
+    .nullable(),
 });
 
 type CreateCourseFormData = z.infer<typeof createCourseSchema>;
@@ -82,6 +91,7 @@ const CreateCoursePage = () => {
     register,
     handleSubmit,
     control,
+    watch,
     formState: { errors },
   } = useForm<CreateCourseFormData>({
     resolver:      zodResolver(createCourseSchema),
@@ -90,17 +100,23 @@ const CreateCoursePage = () => {
       category: 'Basics',
       topic: 'Software Development & Coding',
       target_roles: ['student'],
+      time_limit_value: undefined,
+      time_limit_unit: 'day',
     },
   });
 
+  const watchedTimeLimitValue = watch('time_limit_value');
+
   const onSubmit = (data: CreateCourseFormData) => {
     createCourse({
-      title:         data.title,
-      description:   data.description,
-      category:      data.category,
-      topic:         data.topic,
-      target_roles:  data.target_roles,
-      duration_mins: data.duration_mins,
+      title:             data.title,
+      description:       data.description,
+      category:          data.category,
+      topic:             data.topic,
+      target_roles:      data.target_roles,
+      duration_mins:     data.duration_mins,
+      time_limit_value:  data.time_limit_value ?? null,
+      time_limit_unit:   (data.time_limit_unit as TimeLimitUnit) ?? null,
     });
   };
 
@@ -223,6 +239,46 @@ const CreateCoursePage = () => {
             error={errors.duration_mins?.message}
             {...register('duration_mins', { valueAsNumber: true })}
           />
+
+          {/* Time Limit */}
+          <div className="flex flex-col gap-2">
+            <label className="text-sm font-medium text-gray-700 flex items-center gap-2">
+              <Clock size={16} className="text-amber-500" />
+              Course Time Limit
+              <span className="text-xs text-gray-400 font-normal">(optional)</span>
+            </label>
+            <p className="text-xs text-gray-500">
+              Set a deadline for learners to complete this course after enrolling. Leave empty for no limit.
+            </p>
+            <div className="flex gap-3">
+              <div className="flex-1">
+                <Input
+                  type="number"
+                  placeholder="e.g. 2"
+                  error={errors.time_limit_value?.message}
+                  {...register('time_limit_value', { valueAsNumber: true })}
+                />
+              </div>
+              <div className="w-40">
+                <Select
+                  options={[
+                    { value: 'minute', label: 'Minute(s)' },
+                    { value: 'hour',   label: 'Hour(s)' },
+                    { value: 'day',    label: 'Day(s)' },
+                    { value: 'week',   label: 'Week(s)' },
+                    { value: 'month',  label: 'Month(s)' },
+                  ]}
+                  {...register('time_limit_unit')}
+                />
+              </div>
+            </div>
+            {watchedTimeLimitValue && (
+              <p className="text-xs text-amber-600 flex items-center gap-1">
+                <Clock size={12} />
+                Learners will have {watchedTimeLimitValue} {watch('time_limit_unit')}(s) after enrolling to complete the course.
+              </p>
+            )}
+          </div>
 
           <div className="pt-4 flex justify-end gap-3 border-t border-gray-100">
             <Button

@@ -2,6 +2,7 @@
 // import type { ApiResponse } from './auth.types';
 
 export type CourseCategory = 'Basics' | 'Intermediate' | 'Advanced';
+export type TimeLimitUnit = 'minute' | 'hour' | 'day' | 'week' | 'month';
 
 export type CourseTopic = 
   | 'AI'
@@ -25,6 +26,8 @@ export interface Course {
   target_roles: TargetRole[];
   created_by:   number;
   is_published: boolean;
+  time_limit_value?: number | null;
+  time_limit_unit?: TimeLimitUnit | null;
   created_at:   string;
   updated_at:   string;
   creator_name: string;
@@ -56,6 +59,8 @@ export interface CreateCourseBody {
   category?:     CourseCategory;
   topic?:        CourseTopic;
   target_roles?: TargetRole[];
+  time_limit_value?: number | null;
+  time_limit_unit?:  TimeLimitUnit | null;
 }
 
 export interface UpdateCourseBody {
@@ -65,6 +70,8 @@ export interface UpdateCourseBody {
   category?:     CourseCategory;
   topic?:        CourseTopic;
   target_roles?: TargetRole[];
+  time_limit_value?: number | null;
+  time_limit_unit?:  TimeLimitUnit | null;
 }
 
 export interface CourseFilters {

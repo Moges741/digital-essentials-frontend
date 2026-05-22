@@ -23,6 +23,7 @@ import RegisterPage     from './pages/auth/RegisterPage';
 import VerifyEmailPage  from './pages/auth/VerifyEmailPage';
 import ForgotPasswordPage from './pages/auth/ForgotPasswordPage';
 import ResetPasswordPage  from './pages/auth/ResetPasswordPage';
+import ChangePasswordPage from './pages/auth/ChangePasswordPage';
 import GoogleCallbackPage from './pages/auth/GoogleCallbackPage';
 import CoursesPage      from './pages/courses/CoursesPage';
 import CourseDetailPage from './pages/courses/CourseDetailPage';
@@ -70,7 +71,7 @@ const PublicLayout = ({ children }: { children: React.ReactNode }) => (
   <div className="flex flex-col min-h-screen">
     <Navbar />
     <OfflineBanner />
-    <main className="flex-1">
+    <main className="flex-1 pt-24 sm:pt-28">
       {children}
     </main>
     <Footer />
@@ -115,6 +116,11 @@ const App = () => {
 
       {/* ── Protected (must be logged in) ──────────────── */}
       <Route element={<ProtectedRoute />}>
+
+        {/* Password change (forced on first login) */}
+        <Route path="/change-password" element={
+          <PublicLayout><ChangePasswordPage /></PublicLayout>
+        } />
 
         {/* Shared — any authenticated role */}
         <Route path="/chat" element={<ChatPage />} />

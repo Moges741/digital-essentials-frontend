@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useForm }         from 'react-hook-form';
 import { zodResolver }     from '@hookform/resolvers/zod';
 import { z }               from 'zod';
-import { Mail, Lock, BookOpen } from 'lucide-react';
+import { User, Lock, BookOpen } from 'lucide-react';
 
 import { useLogin }      from '../../hooks/useAuth';
 import { useAuthStore }  from '../../store/auth.store';
@@ -14,7 +14,7 @@ import { useGoogleLogin } from '../../hooks/useGoogleAuth';  // New hook
 
 // ── Zod validation schema ─────────────────────────────────────
 const loginSchema = z.object({
-  email:    z.string().min(1, 'Email is required').email('Please enter a valid email'),
+  username: z.string().min(1, 'Username is required'),
   password: z.string().min(1, 'Password is required'),
 });
 
@@ -67,14 +67,14 @@ const LoginPage = () => {
           <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-5">
 
             <Input
-              label="Email address"
-              type="email"
-              placeholder="you@example.com"
-              leftIcon={<Mail size={16} />}
-              error={errors.email?.message}
-              autoComplete="email"
+              label="Username"
+              type="text"
+              placeholder="Enter your username"
+              leftIcon={<User size={16} />}
+              error={errors.username?.message}
+              autoComplete="username"
               required
-              {...register('email')}
+              {...register('username')}
             />
 
             <PasswordInput

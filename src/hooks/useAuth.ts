@@ -24,8 +24,12 @@ export const useLogin = () => {
       // Save user and token to Zustand + localStorage
       setAuth(data.user, data.token);
       toast.success(`Welcome back, ${data.user.name}!`);
-      // Redirect based on role
-      navigate(getDashboardByRole(data.user.role));
+      // Redirect based on role or password change status
+      if (data.user.must_change_password) {
+        navigate('/change-password');
+      } else {
+        navigate(getDashboardByRole(data.user.role));
+      }
     },
 
     onError: (error: any) => {
@@ -43,8 +47,8 @@ export const useRegister = () => {
   return useMutation({
     mutationFn: (body: RegisterBody) => authApi.register(body),
 
-    onSuccess: (data) => {
-      toast.success(`Account created for ${data.user.name}. Check your email to verify your account.`);
+    onSuccess: () => {
+      toast.success(`Registration successful! Check your email for your username and password.`);
       navigate('/login');
     },
 
@@ -58,6 +62,29 @@ export const useRegister = () => {
           error.response?.data?.message ?? 'Registration failed.';
         toast.error(message);
       }
+    },
+  });
+};
+
+// ── Change Password Hook ──────────────────────────────────────
+export const useChangePassword = () => {
+  const setAuth  = useAuthStore((state) => state.setAuth);
+  const navigate = useNavigate();
+
+  return useMutation({
+    mutationFn: (newPassword: string) => authApi.changePassword(newPassword),
+
+    onSuccess: (data) => {
+      // Update user state with must_change_password = false and new token
+      setAuth(data.user, data.token);
+      toast.success('Password changed successfully!');
+      navigate(getDashboardByRole(data.user.role));
+    },
+
+    onError: (error: any) => {
+      const message =
+        error.response?.data?.message ?? 'Failed to change password. Please try again.';
+      toast.error(message);
     },
   });
 };
