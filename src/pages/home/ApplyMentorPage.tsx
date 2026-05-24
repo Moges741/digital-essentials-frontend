@@ -117,7 +117,7 @@ const ApplyMentorPage = () => {
                   label="Full Name"
                   name="name"
                   required
-                  placeholder="John Doe"
+                  placeholder="your full name"
                   value={formData.name}
                   onChange={handleChange}
                 />
@@ -126,7 +126,7 @@ const ApplyMentorPage = () => {
                   name="email"
                   type="email"
                   required
-                  placeholder="john@example.com"
+                  placeholder="your email"
                   value={formData.email}
                   onChange={handleChange}
                 />
@@ -134,7 +134,7 @@ const ApplyMentorPage = () => {
                   label="Phone Number"
                   name="phone_number"
                   required
-                  placeholder="+1 (555) 000-0000"
+                  placeholder="+251900000000"
                   value={formData.phone_number}
                   onChange={handleChange}
                 />
