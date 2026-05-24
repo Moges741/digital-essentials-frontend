@@ -112,7 +112,7 @@ export const adminApi = {
   },
 
   // Update user role
-  updateUserRole: async (userId: number, role: 'learner' | 'instructor' | 'administrator'): Promise<User> => {
+  updateUserRole: async (userId: number, role: 'learner' | 'mentor' | 'administrator'): Promise<User> => {
     const res = await apiClient.patch<ApiResponse<{ user: User }>>(`/admin/users/${userId}/role`, { role });
     return res.data.data.user;
   },

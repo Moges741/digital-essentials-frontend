@@ -28,7 +28,7 @@ const registerSchema = z.object({
     .max(100, 'Last name must not exceed 100 characters')
     .regex(/^[a-zA-Z\s-]+$/, 'Last name can only contain letters, spaces, and hyphens'),
   email: z.string().min(1, 'Email is required').email('Please enter a valid email'),
-  role: z.enum(['learner', 'instructor', 'administrator']),
+  role: z.enum(['learner', 'mentor', 'administrator']),
   specialization:  z.string().optional(),
   qualifications:  z.string().optional(),
 });

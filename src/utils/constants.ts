@@ -5,7 +5,7 @@ export const APP_NAME     = import.meta.env.VITE_APP_NAME as string;
 
 export const ROLES = {
   LEARNER:       'learner',
-  INSTRUCTOR:    'instructor',
+  INSTRUCTOR:    'mentor',
   ADMINISTRATOR: 'administrator',
 } as const;
 
@@ -22,7 +22,7 @@ export const QUERY_KEYS = {
 } as const;
 
 export const getDashboardByRole = (role: Role): string => {
-  if (role === 'instructor')        return '/instructor';
+  if (role === 'mentor')        return '/instructor';
   if (role === 'administrator') return '/admin';
   return '/dashboard';
 };

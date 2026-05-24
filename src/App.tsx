@@ -262,7 +262,7 @@ const App = () => {
         {/* ── Instructor + Admin Routes ─────────────── */}
         <Route
           element={
-            <RoleGuard allowedRoles={['instructor', 'administrator']} />
+            <RoleGuard allowedRoles={['mentor', 'administrator']} />
           }
         >
 

@@ -246,7 +246,7 @@ const LessonContent = ({
 						)}
 						</div>
 						{/* Creator/Admin quick actions */}
-						{(user?.role === 'instructor' || user?.role === 'administrator') && (
+						{(user?.role === 'mentor' || user?.role === 'administrator') && (
 							<div className="flex items-center gap-2">
 								<Button
 									variant="ghost"

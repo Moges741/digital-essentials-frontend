@@ -151,7 +151,7 @@ const adminNav: NavGroup[] = [
 
 const navByRole: Record<string, NavGroup[]> = {
   learner:       learnerNav,
-  instructor:        instructorNav,
+  mentor:        instructorNav,
   administrator: adminNav,
 };
 
