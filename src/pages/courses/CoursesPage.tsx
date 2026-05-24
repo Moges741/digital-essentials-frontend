@@ -42,7 +42,9 @@ const CoursesPage = () => {
   const user         = useAuthStore((state) => state.user);
 
   const [search, setSearch] = useState(searchParams.get('search') || '');
-  const [selectedTopic, setSelectedTopic] = useState<CourseTopicFilter | ''>((searchParams.get('topic') as CourseTopicFilter) || '');
+  const [selectedTopic, setSelectedTopic] = useState<CourseTopicFilter>(
+    (searchParams.get('topic') as CourseTopicFilter) || 'All'
+  );
   const [page, setPage]   = useState(1);
 
   // Update URL when search or topic changes
@@ -53,11 +55,7 @@ const CoursesPage = () => {
     } else {
       params.delete('search');
     }
-    if (selectedTopic) {
-      params.set('topic', selectedTopic);
-    } else {
-      params.delete('topic');
-    }
+    params.set('topic', selectedTopic || 'All');
     setSearchParams(params, { replace: true });
   }, [search, selectedTopic, searchParams, setSearchParams]);
 
@@ -65,7 +63,7 @@ const CoursesPage = () => {
     search: search || undefined,
     page,
     limit: LIMIT,
-    topic: selectedTopic === 'All' || selectedTopic === '' ? undefined : selectedTopic,
+    topic: selectedTopic === 'All' ? undefined : selectedTopic,
   });
 
   const handleSearch = useCallback((value: string) => {
@@ -129,7 +127,7 @@ const CoursesPage = () => {
   const sections: CourseSection[] = [
     {
       category: 'Basics',
-      title: '🌱 Beginner-Friendly Basics',
+      title: ' Beginner-Friendly Basics',
       description: 'Start your learning journey here! These courses require no prior knowledge and cover fundamental concepts. Perfect for newcomers.',
       icon: <BookOpen size={24} className="text-green-600" />,
       bgGradient: 'from-green-50 to-emerald-50',
@@ -137,7 +135,7 @@ const CoursesPage = () => {
     },
     {
       category: 'Intermediate',
-      title: '⚡ Intermediate Level',
+      title: ' Intermediate Level',
       description: 'Ready to level up? These courses build on basics and introduce more complex topics. We recommend completing relevant Basics courses first.',
       icon: <Zap size={24} className="text-blue-600" />,
       bgGradient: 'from-blue-50 to-cyan-50',
@@ -145,7 +143,7 @@ const CoursesPage = () => {
     },
     {
       category: 'Advanced',
-      title: '🏆 Advanced Challenges',
+      title: ' Advanced Challenges',
       description: 'For experienced learners seeking mastery. These courses tackle advanced topics and real-world scenarios. Prerequisites and foundational knowledge recommended.',
       icon: <Award size={24} className="text-purple-600" />,
       bgGradient: 'from-purple-50 to-pink-50',
@@ -193,6 +191,8 @@ const CoursesPage = () => {
             rightIcon={
               search ? (
                 <button
+                  type="button"
+                  onMouseDown={(e) => e.preventDefault()}
                   onClick={handleClearSearch}
                   className="text-gray-400 hover:text-gray-600"
                 >
@@ -240,16 +240,15 @@ const CoursesPage = () => {
                   return (
                     <button
                       key={topic}
-                      onClick={() => setSelectedTopic(isSelected ? '' : topic)}
+                      onClick={() => setSelectedTopic(topic)}
                       className={`
                         px-4 py-2 rounded-full text-sm font-medium transition-all
                         ${isSelected
                           ? 'bg-primary-600 text-white shadow-md'
                           : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
                         }
-                        ${courseCount === 0 ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
+                        cursor-pointer
                       `}
-                      disabled={courseCount === 0}
                     >
                       {topic}
                       {courseCount > 0 && (
@@ -319,14 +318,14 @@ const CoursesPage = () => {
             )}
 
             {/* Empty state for entire category */}
-            {Object.values(section.coursesByTopic).every((courses) => courses.length === 0) && (
+            {/* {Object.values(section.coursesByTopic).every((courses) => courses.length === 0) && (
               <div className="text-center py-12 bg-gray-50 rounded-xl border border-gray-100">
                 <BookOpen size={32} className="mx-auto text-gray-300 mb-3" />
                 <p className="text-gray-500 text-sm">
                   No {section.category.toLowerCase()} courses available yet
                 </p>
-              </div>
-            )}
+              </div> */}
+            {/* )} */}
           </div>
         ))}
       </div>

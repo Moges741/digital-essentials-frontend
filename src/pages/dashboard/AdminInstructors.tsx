@@ -1,13 +1,10 @@
-import { useState } from 'react';
-import { Search, Users, Award, Mail, Edit2 } from 'lucide-react';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import toast from 'react-hot-toast';
-import { adminApi, type AdminInstructor } from '../../api/admin.api';
+import { useMemo, useState } from 'react';
+import { Search, Users, Award, Mail, BadgeCheck, Sparkles, CalendarDays } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
+import { adminApi } from '../../api/admin.api';
 import Card, { CardHeader, CardTitle } from '../../components/ui/Card';
-import Button from '../../components/ui/Button';
 import Input from '../../components/ui/Input';
 import EmptyState from '../../components/ui/EmptyState';
-import Modal from '../../components/ui/Modal';
 import { PageSpinner } from '../../components/ui/Spinner';
 import Badge from '../../components/ui/Badge';
 import { formatDate } from '../../utils/format';
@@ -20,54 +17,8 @@ const useAllInstructors = () => {
 };
 
 const AdminInstructors = () => {
-  const queryClient = useQueryClient();
   const { data: instructors, isLoading } = useAllInstructors();
   const [search, setSearch] = useState('');
-  const [editModal, setEditModal] = useState<{
-    isOpen: boolean;
-    instructor?: AdminInstructor;
-  }>({ isOpen: false });
-
-  const [form, setForm] = useState({
-    specialization: '',
-    qualifications: '',
-  });
-
-  const closeEditModal = () => {
-    setEditModal({ isOpen: false });
-    setForm({ specialization: '', qualifications: '' });
-  };
-
-  const updateMutation = useMutation({
-    mutationFn: () => {
-      if (!editModal.instructor) {
-        throw new Error('No instructor selected');
-      }
-
-      return adminApi.updateInstructorProfile(editModal.instructor.user_id, {
-        specialization: form.specialization.trim(),
-        qualifications: form.qualifications.trim() === '' ? undefined : form.qualifications.trim(),
-      });
-    },
-    onSuccess: () => {
-      toast.success('Instructor profile updated successfully');
-      closeEditModal();
-      queryClient.invalidateQueries({ queryKey: ['admin', 'instructors'] });
-    },
-    onError: () => {
-      toast.error('Unable to update instructor profile');
-    },
-  });
-
-  const openEditModal = (instructor: AdminInstructor) => {
-    setEditModal({ isOpen: true, instructor });
-    setForm({
-      specialization: instructor.specialization,
-      qualifications: instructor.qualifications || '',
-    });
-  };
-
-  if (isLoading) return <PageSpinner />;
 
   const allInstructors = instructors ?? [];
   const filteredInstructors = allInstructors.filter((instructor) => {
@@ -80,21 +31,57 @@ const AdminInstructors = () => {
     );
   });
 
+  const stats = useMemo(() => {
+    const active = allInstructors.filter((instructor) => instructor.is_active).length;
+    return {
+      total: allInstructors.length,
+      active,
+      inactive: allInstructors.length - active,
+    };
+  }, [allInstructors]);
+
+
+  if (isLoading) return <PageSpinner />;
   return (
     <div className="flex flex-col gap-8">
-      <div>
-        <div className="flex items-center gap-2 mb-1">
-          <Award size={18} className="text-primary-600" />
-          <h1 className="text-2xl font-bold text-gray-900">Manage Instructors</h1>
+      <div className="rounded-3xl border border-primary-100 bg-gradient-to-br from-amber-50 via-white to-sky-50 p-6 shadow-sm">
+        <div className="flex flex-wrap items-center gap-3 mb-4">
+          <div className="rounded-2xl bg-white p-3 shadow-sm border border-amber-100">
+            <Award size={22} className="text-amber-600" />
+          </div>
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">Mentor Directory</h1>
+            <p className="text-sm text-gray-600 mt-1">
+              View every mentor profile in a clean read-only directory.
+            </p>
+          </div>
         </div>
-        <p className="text-sm text-gray-500">
-          View and manage instructor specializations and qualifications
-        </p>
+
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div className="rounded-2xl bg-white/80 border border-white/60 p-4 backdrop-blur-sm">
+            <p className="text-xs uppercase tracking-wide text-gray-500 flex items-center gap-2">
+              <Users size={14} /> Total mentors
+            </p>
+            <p className="text-2xl font-bold text-gray-900 mt-2">{stats.total}</p>
+          </div>
+          <div className="rounded-2xl bg-white/80 border border-white/60 p-4 backdrop-blur-sm">
+            <p className="text-xs uppercase tracking-wide text-gray-500 flex items-center gap-2">
+              <BadgeCheck size={14} /> Active mentors
+            </p>
+            <p className="text-2xl font-bold text-gray-900 mt-2">{stats.active}</p>
+          </div>
+          <div className="rounded-2xl bg-white/80 border border-white/60 p-4 backdrop-blur-sm">
+            <p className="text-xs uppercase tracking-wide text-gray-500 flex items-center gap-2">
+              <Sparkles size={14} /> Inactive mentors
+            </p>
+            <p className="text-2xl font-bold text-gray-900 mt-2">{stats.inactive}</p>
+          </div>
+        </div>
       </div>
 
       <Card padding="md">
         <CardHeader>
-          <CardTitle>All Instructors ({filteredInstructors.length})</CardTitle>
+          <CardTitle>All Mentors ({filteredInstructors.length})</CardTitle>
         </CardHeader>
 
         <div className="mb-6">
@@ -109,176 +96,73 @@ const AdminInstructors = () => {
         {filteredInstructors.length === 0 ? (
           <EmptyState
             icon={<Users size={24} />}
-            title={search ? 'No instructors match your search' : 'No instructors yet'}
-            description="Instructors will appear here when users register with instructor role"
+            title={search ? 'No mentors match your search' : 'No mentors yet'}
+            description="Mentors will appear here when users register with the instructor role."
           />
         ) : (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 xl:grid-cols-2 gap-5">
             {filteredInstructors.map((instructor) => (
               <div
                 key={instructor.user_id}
-                className="border border-gray-200 rounded-xl p-5 hover:border-primary-300 hover:shadow-md transition-all"
+                className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm hover:shadow-md hover:border-amber-200 transition-all"
               >
-                {/* Header */}
-                <div className="flex items-start justify-between mb-4">
-                  <div className="flex-1">
-                    <h3 className="text-sm font-semibold text-gray-900">{instructor.name}</h3>
-                    <p className="text-xs text-gray-500 flex items-center gap-1 mt-1">
+                <div className="flex items-start justify-between gap-4 mb-4">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <h3 className="text-base font-semibold text-gray-900 truncate">{instructor.name}</h3>
+                      <span className="inline-flex items-center rounded-full bg-amber-50 px-2.5 py-1 text-xs font-medium text-amber-700">
+                        Mentor
+                      </span>
+                    </div>
+                    <p className="text-xs text-gray-500 flex items-center gap-1 mt-2 truncate">
                       <Mail size={12} />
                       {instructor.email}
                     </p>
                   </div>
-                  <Badge
-                    variant={instructor.is_active ? 'success' : 'neutral'}
-                    size="sm"
-                  >
+
+                  <Badge variant={instructor.is_active ? 'success' : 'neutral'} size="sm">
                     {instructor.is_active ? 'Active' : 'Inactive'}
                   </Badge>
                 </div>
 
-                {/* Info Grid */}
-                <div className="space-y-3 mb-4">
-                  {/* Specialization */}
-                  <div className="bg-primary-50 rounded-lg p-3">
-                    <p className="text-xs text-gray-600 font-medium uppercase tracking-wide mb-1">
-                      Specialization
-                    </p>
-                    <p className="text-sm font-semibold text-primary-700">
-                      {instructor.specialization}
-                    </p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
+                  <div className="rounded-xl bg-amber-50 p-3">
+                    <p className="text-xs uppercase tracking-wide text-gray-500 mb-1">Specialization</p>
+                    <p className="text-sm font-semibold text-amber-800 break-words">{instructor.specialization}</p>
                   </div>
 
-                  {/* Qualifications */}
-                  {instructor.qualifications && (
-                    <div className="bg-blue-50 rounded-lg p-3">
-                      <p className="text-xs text-gray-600 font-medium uppercase tracking-wide mb-1">
-                        Qualifications
-                      </p>
-                      <p className="text-sm text-blue-700 line-clamp-2">
-                        {instructor.qualifications}
-                      </p>
-                    </div>
-                  )}
-
-                  {/* Dates */}
-                  <div className="grid grid-cols-2 gap-2 text-xs">
-                    <div className="text-gray-600">
-                      <p className="font-medium text-gray-500">Joined</p>
-                      <p className="text-gray-700 mt-0.5">{formatDate(instructor.created_at)}</p>
-                    </div>
-                    <div className="text-gray-600">
-                      <p className="font-medium text-gray-500">Updated</p>
-                      <p className="text-gray-700 mt-0.5">{formatDate(instructor.updated_at)}</p>
-                    </div>
+                  <div className="rounded-xl bg-sky-50 p-3">
+                    <p className="text-xs uppercase tracking-wide text-gray-500 mb-1">Account status</p>
+                    <p className="text-sm font-semibold text-sky-800">
+                      {instructor.is_active ? 'Visible in the system' : 'Temporarily inactive'}
+                    </p>
                   </div>
                 </div>
 
-                {/* Action Button */}
-                <Button
-                  variant="primary"
-                  size="sm"
-                  fullWidth
-                  onClick={() => openEditModal(instructor)}
-                  className="flex items-center justify-center gap-2"
-                >
-                  <Edit2 size={14} />
-                  Edit Profile
-                </Button>
+                {instructor.qualifications && (
+                  <div className="rounded-xl bg-gray-50 p-3 mb-4">
+                    <p className="text-xs uppercase tracking-wide text-gray-500 mb-1">Qualifications</p>
+                    <p className="text-sm text-gray-700 leading-relaxed">
+                      {instructor.qualifications}
+                    </p>
+                  </div>
+                )}
+
+                <div className="grid grid-cols-2 gap-3 text-xs text-gray-600">
+                  <div className="rounded-xl border border-gray-100 p-3">
+                    <p className="font-medium text-gray-500 flex items-center gap-1 mb-1"><CalendarDays size={12} /> Joined</p>
+                    <p className="text-gray-800">{formatDate(instructor.created_at)}</p>
+                  </div>
+                  <div className="rounded-xl border border-gray-100 p-3">
+                    <p className="font-medium text-gray-500 flex items-center gap-1 mb-1"><CalendarDays size={12} /> Updated</p>
+                    <p className="text-gray-800">{formatDate(instructor.updated_at)}</p>
+                  </div>
+                </div>
               </div>
             ))}
           </div>
         )}
       </Card>
-
-      {/* Edit Modal */}
-      <Modal
-        isOpen={editModal.isOpen}
-        onClose={closeEditModal}
-        title={`Edit Instructor: ${editModal.instructor?.name}`}
-        size="lg"
-        footer={
-          <>
-            <Button
-              variant="secondary"
-              onClick={closeEditModal}
-            >
-              Cancel
-            </Button>
-            <Button
-              onClick={() => updateMutation.mutate()}
-              isLoading={updateMutation.isPending}
-            >
-              Save Changes
-            </Button>
-          </>
-        }
-      >
-        <div className="space-y-4">
-          {/* Email Info */}
-          <div>
-            <label className="text-sm font-medium text-gray-700 block mb-1.5">
-              Email
-            </label>
-            <input
-              type="email"
-              disabled
-              value={editModal.instructor?.email || ''}
-              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm bg-gray-50 text-gray-600"
-            />
-          </div>
-
-          {/* Specialization */}
-          <div>
-            <label className="text-sm font-medium text-gray-700 block mb-1.5">
-              Specialization <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="text"
-              placeholder="e.g., Data Science, Web Development, Design"
-              value={form.specialization}
-              onChange={(e) =>
-                setForm((prev) => ({
-                  ...prev,
-                  specialization: e.target.value,
-                }))
-              }
-              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-primary-500 focus:ring-1 focus:ring-primary-500 outline-none transition"
-            />
-            <p className="text-xs text-gray-500 mt-1">
-              Main area of expertise (required)
-            </p>
-          </div>
-
-          {/* Qualifications */}
-          <div>
-            <label className="text-sm font-medium text-gray-700 block mb-1.5">
-              Qualifications
-            </label>
-            <textarea
-              placeholder="e.g., B.S. in Computer Science, AWS Certified Solutions Architect, 10+ years of experience..."
-              value={form.qualifications}
-              onChange={(e) =>
-                setForm((prev) => ({
-                  ...prev,
-                  qualifications: e.target.value,
-                }))
-              }
-              rows={4}
-              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-primary-500 focus:ring-1 focus:ring-primary-500 outline-none transition resize-none"
-            />
-            <p className="text-xs text-gray-500 mt-1">
-              Degrees, certifications, and professional experience (optional)
-            </p>
-          </div>
-
-          {/* Info Box */}
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
-            <p className="text-xs text-blue-700">
-              <strong>Note:</strong> Changes will be visible immediately to learners and instructors in the system.
-            </p>
-          </div>
-        </div>
-      </Modal>
     </div>
   );
 };

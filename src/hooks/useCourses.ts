@@ -1,5 +1,5 @@
 
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { keepPreviousData, useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import toast           from 'react-hot-toast';
 import { courseApi }   from '../api/course.api';
@@ -15,6 +15,7 @@ export const useCourses = (filters: CourseFilters = {}) => {
   return useQuery({
     queryKey: [QUERY_KEYS.COURSES, filters],
     queryFn:  () => courseApi.list(filters),
+    placeholderData: keepPreviousData,
   });
 };
 
