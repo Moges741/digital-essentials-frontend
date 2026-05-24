@@ -193,7 +193,7 @@ const ApplyInstructorPage = () => {
                   label="LinkedIn Profile URL"
                   name="linkedin_link"
                   type="url"
-                  placeholder="https://linkedin.com/in/johndoe"
+                  placeholder="https://linkedin.com/in/username"
                   value={formData.linkedin_link}
                   onChange={handleChange}
                 />
@@ -201,7 +201,7 @@ const ApplyInstructorPage = () => {
                   label="GitHub Profile URL"
                   name="github_link"
                   type="url"
-                  placeholder="https://github.com/johndoe"
+                  placeholder="https://github.com/username"
                   value={formData.github_link}
                   onChange={handleChange}
                 />
