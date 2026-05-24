@@ -3,7 +3,7 @@ import { useNavigate, useSearchParams }    from 'react-router-dom';
 import { BookOpen, Plus, Zap, Award }        from 'lucide-react';
 import { useCourses }            from '../../hooks/useCourses';
 import { useAuthStore }          from '../../store/auth.store';
-import type { CourseCategory, CourseTopic }   from '../../types/course.types';
+import type { CourseCategory, CourseTopic, CourseTopicFilter }   from '../../types/course.types';
 import CourseCard                from '../../components/course/CourseCard';
 import Input from '../../components/ui/Input';
 import Button                   from '../../components/ui/Button';
@@ -19,10 +19,13 @@ const TOPICS: CourseTopic[] = [
   'Cloud Computing',
   'Cyber Security',
   'Safety Issue',
+  'General',
   'Software Development & Coding',
   'Digital Marketing',
   'E-Commerce',
 ];
+
+const FILTER_TOPICS: CourseTopicFilter[] = ['All', ...TOPICS];
 
 interface CourseSection {
   category: CourseCategory;
@@ -39,7 +42,7 @@ const CoursesPage = () => {
   const user         = useAuthStore((state) => state.user);
 
   const [search, setSearch] = useState(searchParams.get('search') || '');
-  const [selectedTopic, setSelectedTopic] = useState<CourseTopic | ''>((searchParams.get('topic') as CourseTopic) || '');
+  const [selectedTopic, setSelectedTopic] = useState<CourseTopicFilter | ''>((searchParams.get('topic') as CourseTopicFilter) || '');
   const [page, setPage]   = useState(1);
 
   // Update URL when search or topic changes
@@ -62,6 +65,7 @@ const CoursesPage = () => {
     search: search || undefined,
     page,
     limit: LIMIT,
+    topic: selectedTopic === 'All' || selectedTopic === '' ? undefined : selectedTopic,
   });
 
   const handleSearch = useCallback((value: string) => {
@@ -93,7 +97,7 @@ const CoursesPage = () => {
     // Populate courses
     allCourses.forEach((course) => {
       const category = course.category || 'Basics';
-      const topic = course.topic || 'Software Development & Coding';
+      const topic = course.topic || 'General';
       if (category in grouped && topic in grouped[category as CourseCategory]) {
         grouped[category as CourseCategory][topic as CourseTopic].push(course);
       }
@@ -227,8 +231,10 @@ const CoursesPage = () => {
                 Filter by Topic:
               </h3>
               <div className="flex flex-wrap gap-2">
-                {TOPICS.map((topic) => {
-                  const courseCount = section.coursesByTopic[topic]?.length || 0;
+                {FILTER_TOPICS.map((topic) => {
+                  const courseCount = topic === 'All'
+                    ? Object.values(section.coursesByTopic).reduce((total, courses) => total + courses.length, 0)
+                    : section.coursesByTopic[topic]?.length || 0;
                   const isSelected = selectedTopic === topic;
                   
                   return (
@@ -259,8 +265,23 @@ const CoursesPage = () => {
 
             {/* Courses grid - filtered by selected topic if any */}
             {selectedTopic ? (
-              // Show only selected topic
-              section.coursesByTopic[selectedTopic]?.length === 0 ? (
+              // Show all courses in this category
+              selectedTopic === 'All' ? (
+                Object.values(section.coursesByTopic).every((courses) => courses.length === 0) ? (
+                  <div className="text-center py-12 bg-gray-50 rounded-xl border border-gray-100">
+                    <BookOpen size={32} className="mx-auto text-gray-300 mb-3" />
+                    <p className="text-gray-500 text-sm">
+                      No courses in {section.category.toLowerCase()} yet
+                    </p>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+                    {Object.values(section.coursesByTopic).flat().map((course) => (
+                      <CourseCard key={course.course_id} course={course} />
+                    ))}
+                  </div>
+                )
+              ) : section.coursesByTopic[selectedTopic]?.length === 0 ? (
                 <div className="text-center py-12 bg-gray-50 rounded-xl border border-gray-100">
                   <BookOpen size={32} className="mx-auto text-gray-300 mb-3" />
                   <p className="text-gray-500 text-sm">

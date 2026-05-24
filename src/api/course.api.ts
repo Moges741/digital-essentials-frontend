@@ -22,6 +22,7 @@ export const courseApi = {
     if (filters.search) params.set('search', filters.search);
     if (filters.page)   params.set('page',   String(filters.page));
     if (filters.limit)  params.set('limit',  String(filters.limit));
+    if (filters.topic && filters.topic !== 'All') params.set('topic', filters.topic);
 
     const res = await apiClient.get<ApiResponse<PaginatedCourses>>(
       `/courses?${params.toString()}`

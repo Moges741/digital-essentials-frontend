@@ -10,9 +10,12 @@ export type CourseTopic =
   | 'Cloud Computing'
   | 'Cyber Security'
   | 'Safety Issue'
+  | 'General'
   | 'Software Development & Coding'
   | 'Digital Marketing'
   | 'E-Commerce';
+
+export type CourseTopicFilter = CourseTopic | 'All';
 
 export type TargetRole = 'teacher' | 'doctor' | 'student' | 'farmer' | 'merchant' | 'professional' | 'general';
 
@@ -80,4 +83,5 @@ export interface CourseFilters {
   search?: string;
   page?:   number;
   limit?:  number;
+  topic?:  CourseTopicFilter;
 }
