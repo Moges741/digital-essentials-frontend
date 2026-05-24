@@ -125,7 +125,3 @@
 
  ---
 
- If you want, I can also:
-
- - Add a short `CONTRIBUTING.md` with onboarding steps and branch rules.
- - Produce a single-page quick-start for non-dev admins (how to approve instructors, view certificates, manage categories).
