@@ -1,5 +1,5 @@
 // src/pages/exam/ExamSubmissionPage.tsx
-// Individual submission grading page for mentors
+// Individual submission grading page for instructors
 
 import { useParams, useNavigate } from 'react-router-dom';
 import {
@@ -41,7 +41,7 @@ const ExamSubmissionPage = () => {
           description="The requested exam submission could not be found."
           action={{
             label: 'Back to Submissions',
-            onClick: () => navigate(`/mentor/courses/${courseId}/exam/review`),
+            onClick: () => navigate(`/instructor/courses/${courseId}/exam/review`),
           }}
         />
       </div>
@@ -68,7 +68,7 @@ const ExamSubmissionPage = () => {
       {/* Header */}
       <div className="flex items-center gap-4">
         <button
-          onClick={() => navigate(`/mentor/courses/${courseId}/exam/review`)}
+          onClick={() => navigate(`/instructor/courses/${courseId}/exam/review`)}
           className="flex items-center gap-2 text-sm text-gray-500 hover:text-gray-700"
         >
           <ArrowLeft size={15} /> Back to Submissions

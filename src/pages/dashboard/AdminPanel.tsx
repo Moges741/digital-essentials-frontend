@@ -280,12 +280,12 @@ const AdminPanel = () => {
 
       {/* Management Shortcuts */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card padding="md" className="flex flex-col items-center justify-center text-center cursor-pointer hover:shadow-md transition-shadow" onClick={() => navigate('/admin/mentors')}>
+        <Card padding="md" className="flex flex-col items-center justify-center text-center cursor-pointer hover:shadow-md transition-shadow" onClick={() => navigate('/admin/instructors')}>
           <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center mb-3">
             <Users size={20} className="text-purple-600" />
           </div>
-          <h3 className="text-sm font-semibold text-gray-900 mb-1">Manage Mentors</h3>
-          <p className="text-xs text-gray-500">View and edit mentor profiles</p>
+          <h3 className="text-sm font-semibold text-gray-900 mb-1">Manage Instructors</h3>
+          <p className="text-xs text-gray-500">View and edit instructor profiles</p>
         </Card>
 
         <Card padding="md" className="flex flex-col items-center justify-center text-center cursor-pointer hover:shadow-md transition-shadow" onClick={() => navigate('/admin/certificates')}>

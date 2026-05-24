@@ -66,8 +66,8 @@ const ExercisePage = () => {
   const exerciseId = parseInt(exercise_id ?? '0', 10);
 
   const isLearner = user?.role === ROLES.LEARNER;
-  const isMentor  =
-    user?.role === ROLES.MENTOR ||
+  const isInstructor  =
+    user?.role === ROLES.INSTRUCTOR ||
     user?.role === ROLES.ADMINISTRATOR;
 
   // Fetch exercise
@@ -82,7 +82,7 @@ const ExercisePage = () => {
     isLoading: submissionsLoading,
   } = useMySubmissions(courseId);
 
-  // Fetch all submissions (mentor/admin)
+  // Fetch all submissions (instructor/admin)
   const {
     data: allSubmissions,
   } = useSubmissions(courseId, exerciseId);
@@ -268,8 +268,8 @@ const ExercisePage = () => {
         </>
       )}
 
-      {/* ── MENTOR / ADMIN VIEW ───────────────────────────── */}
-      {isMentor && (
+      {/* ── INSTRUCTOR / ADMIN VIEW ───────────────────────────── */}
+      {isInstructor && (
         <Card padding="md">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">

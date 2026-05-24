@@ -91,7 +91,7 @@ const MaterialRow = ({
               View
             </Button>
           </a>
-          {/* Delete (mentor/admin only) */}
+          {/* Delete (instructor/admin only) */}
           {canDelete && (
             <Button
               variant="ghost"
@@ -125,7 +125,7 @@ const LessonMaterials = ({
 }: LessonMaterialsProps) => {
   const user     = useAuthStore((s) => s.user);
   const canDelete =
-    user?.role === ROLES.MENTOR ||
+    user?.role === ROLES.INSTRUCTOR ||
     user?.role === ROLES.ADMINISTRATOR;
 
   if (!materials.length) return null;

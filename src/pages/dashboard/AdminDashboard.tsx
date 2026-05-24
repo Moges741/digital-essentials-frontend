@@ -176,7 +176,7 @@ const AdminDashboard = () => {
 
   // Mutations
   const updateRoleMutation = useMutation({
-    mutationFn: ({ userId, role }: { userId: number; role: 'learner' | 'mentor' | 'administrator' }) =>
+    mutationFn: ({ userId, role }: { userId: number; role: 'learner' | 'instructor' | 'administrator' }) =>
       adminApi.updateUserRole(userId, role),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin', 'users'] });
@@ -201,10 +201,10 @@ const AdminDashboard = () => {
 
   // Role counts
   const learners = allUsers.filter((u) => u.role === 'learner').length;
-  const mentors  = allUsers.filter((u) => u.role === 'mentor').length;
+  const instructors  = allUsers.filter((u) => u.role === 'instructor').length;
   // const admins   = allUsers.filter((u) => u.role === 'administrator').length;
 
-  const handleRoleChange = (user: User, newRole: 'learner' | 'mentor' | 'administrator') => {
+  const handleRoleChange = (user: User, newRole: 'learner' | 'instructor' | 'administrator') => {
     updateRoleMutation.mutate({ userId: user.user_id, role: newRole });
   };
 
@@ -324,8 +324,8 @@ const AdminDashboard = () => {
             />
             <StatCard
               icon={<Award size={20} className="text-amber-600" />}
-              label="Mentors"
-              value={mentors}
+              label="Instructors"
+              value={instructors}
               color="bg-amber-50"
             />
           </div>
@@ -511,7 +511,7 @@ const AdminDashboard = () => {
               <div className="space-y-2">
                 {[
                   { value: 'learner', label: 'Learner', description: 'Can enroll in courses and complete lessons' },
-                  { value: 'mentor', label: 'Mentor', description: 'Can create and manage courses' },
+                  { value: 'instructor', label: 'Instructor', description: 'Can create and manage courses' },
                   { value: 'administrator', label: 'Administrator', description: 'Full system access and user management' },
                 ].map((role) => (
                   <button

@@ -61,7 +61,7 @@ const CourseRow = ({ course }: { course: any }) => {
               {course.title}
             </p>
             <Badge variant="neutral" className="shrink-0">
-              {isOwner ? 'Mine' : 'Other mentor'}
+              {isOwner ? 'Mine' : 'Other instructor'}
             </Badge>
           </div>
           <div className="mt-0.5 flex items-center gap-2">
@@ -103,7 +103,7 @@ const CourseRow = ({ course }: { course: any }) => {
               variant="ghost"
               size="sm"
               leftIcon={<FilePen size={13} />}
-              onClick={() => navigate(`/mentor/courses/${course.course_id}/exam`)}
+              onClick={() => navigate(`/instructor/courses/${course.course_id}/exam`)}
             >
               Create Exam
             </Button>
@@ -114,7 +114,7 @@ const CourseRow = ({ course }: { course: any }) => {
               variant="ghost"
               size="sm"
               leftIcon={<ClipboardList size={13} />}
-              onClick={() => navigate(`/mentor/courses/${course.course_id}/exam/review`)}
+              onClick={() => navigate(`/instructor/courses/${course.course_id}/exam/review`)}
             >
               Exam Review
             </Button>
@@ -149,7 +149,7 @@ const CourseRow = ({ course }: { course: any }) => {
 };
 
 // ── Main Dashboard ────────────────────────────────────────────
-const MentorDashboard = () => {
+const InstructorDashboard = () => {
   const navigate = useNavigate();
   const user = useAuthStore((s) => s.user);
 
@@ -168,13 +168,13 @@ const MentorDashboard = () => {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">
-            {isAdmin ? 'Admin Panel' : 'Mentor Dashboard'}
+            {isAdmin ? 'Admin Panel' : 'Instructor Dashboard'}
           </h1>
           <p className="mt-1 text-sm text-gray-500">
             Manage your courses and learners
           </p>
         </div>
-        <Button leftIcon={<Plus size={16} />} onClick={() => navigate('/mentor/courses/create')}>
+        <Button leftIcon={<Plus size={16} />} onClick={() => navigate('/instructor/courses/create')}>
           New Course
         </Button>
       </div>
@@ -216,7 +216,7 @@ const MentorDashboard = () => {
           <div>
             <p className="text-sm font-semibold text-gray-900">Browsing courses</p>
             <p className="text-xs text-gray-500">
-              You can see published courses from other mentors, but you can only manage your own courses.
+              You can see published courses from other instructors, but you can only manage your own courses.
             </p>
           </div>
           <Badge variant="neutral">{courses.length} visible</Badge>
@@ -239,7 +239,7 @@ const MentorDashboard = () => {
               description="Create your first course to get started."
               action={{
                 label: 'Create Course',
-                onClick: () => navigate('/mentor/courses/create'),
+                onClick: () => navigate('/instructor/courses/create'),
               }}
             />
           </Card>
@@ -255,4 +255,4 @@ const MentorDashboard = () => {
   );
 };
 
-export default MentorDashboard;
+export default InstructorDashboard;

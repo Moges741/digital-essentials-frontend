@@ -28,7 +28,7 @@ export interface AdminCertificate {
   course_title: string;
 }
 
-export interface AdminMentor {
+export interface AdminInstructor {
   user_id: number;
   name: string;
   email: string;
@@ -46,7 +46,7 @@ export interface UpdateAdminCertificateBody {
   certificate_url?: string | null;
 }
 
-export interface UpdateMentorProfileBody {
+export interface UpdateInstructorProfileBody {
   specialization: string;
   qualifications?: string;
 }
@@ -112,7 +112,7 @@ export const adminApi = {
   },
 
   // Update user role
-  updateUserRole: async (userId: number, role: 'learner' | 'mentor' | 'administrator'): Promise<User> => {
+  updateUserRole: async (userId: number, role: 'learner' | 'instructor' | 'administrator'): Promise<User> => {
     const res = await apiClient.patch<ApiResponse<{ user: User }>>(`/admin/users/${userId}/role`, { role });
     return res.data.data.user;
   },
@@ -158,21 +158,21 @@ export const adminApi = {
     await apiClient.delete(`/admin/certificates/${certificateId}`);
   },
 
-  // Get all mentors
-  getAllMentors: async (): Promise<AdminMentor[]> => {
-    const res = await apiClient.get<ApiResponse<{ mentors: AdminMentor[] }>>('/admin/mentors');
-    return res.data.data.mentors;
+  // Get all instructors
+  getAllInstructors: async (): Promise<AdminInstructor[]> => {
+    const res = await apiClient.get<ApiResponse<{ instructors: AdminInstructor[] }>>('/admin/instructors');
+    return res.data.data.instructors;
   },
 
-  // Update mentor profile
-  updateMentorProfile: async (
+  // Update instructor profile
+  updateInstructorProfile: async (
     userId: number,
-    payload: UpdateMentorProfileBody
-  ): Promise<AdminMentor> => {
-    const res = await apiClient.patch<ApiResponse<{ mentor: AdminMentor }>>(
-      `/admin/mentors/${userId}`,
+    payload: UpdateInstructorProfileBody
+  ): Promise<AdminInstructor> => {
+    const res = await apiClient.patch<ApiResponse<{ instructor: AdminInstructor }>>(
+      `/admin/instructors/${userId}`,
       payload
     );
-    return res.data.data.mentor;
+    return res.data.data.instructor;
   },
 };

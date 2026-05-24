@@ -246,19 +246,19 @@ const LessonContent = ({
 						)}
 						</div>
 						{/* Creator/Admin quick actions */}
-						{(user?.role === 'mentor' || user?.role === 'administrator') && (
+						{(user?.role === 'instructor' || user?.role === 'administrator') && (
 							<div className="flex items-center gap-2">
 								<Button
 									variant="ghost"
 									size="sm"
-									onClick={() => navigate(`/mentor/courses/${courseId}/lessons/create`)}
+									onClick={() => navigate(`/instructor/courses/${courseId}/lessons/create`)}
 								>
 									Add lesson
 								</Button>
 								<Button
 									variant="ghost"
 									size="sm"
-									onClick={() => navigate(`/mentor/courses/${courseId}/materials/create?lesson_id=${lesson.lesson_id}`)}
+									onClick={() => navigate(`/instructor/courses/${courseId}/materials/create?lesson_id=${lesson.lesson_id}`)}
 								>
 									Add material
 								</Button>

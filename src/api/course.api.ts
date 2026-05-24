@@ -39,7 +39,7 @@ export const courseApi = {
   },
 
   // POST /api/courses
-  // mentor, admin only
+  // instructor, admin only
   create: async (body: CreateCourseBody): Promise<Course> => {
     const config = body instanceof FormData ? { headers: { 'Content-Type': 'multipart/form-data' } } : undefined;
     const res = await apiClient.post<ApiResponse<{ course: Course }>>('/courses', body as any, config);
@@ -47,7 +47,7 @@ export const courseApi = {
   },
 
   // PATCH /api/courses/:course_id
-  // mentor (own), admin
+  // instructor (own), admin
   update: async (course_id: number, body: UpdateCourseBody): Promise<Course> => {
     const config = body instanceof FormData ? { headers: { 'Content-Type': 'multipart/form-data' } } : undefined;
     const res = await apiClient.patch<ApiResponse<{ course: Course }>>(
@@ -59,7 +59,7 @@ export const courseApi = {
   },
 
   // PATCH /api/courses/:course_id/publish
-  // mentor (own), admin
+  // instructor (own), admin
   publish: async (course_id: number, is_published: boolean): Promise<Course> => {
     const res = await apiClient.patch<ApiResponse<{ course: Course }>>(
       `/courses/${course_id}/publish`,

@@ -26,8 +26,8 @@ const CourseCard = ({ course }: CourseCardProps) => {
 
   const user = useAuthStore((state) => state.user);
 
-  const isMentorOrAdmin =
-    user?.role === ROLES.MENTOR ||
+  const isInstructorOrAdmin =
+    user?.role === ROLES.INSTRUCTOR ||
     user?.role === ROLES.ADMINISTRATOR;
 
   // Convert minutes to readable format
@@ -88,7 +88,7 @@ const CourseCard = ({ course }: CourseCardProps) => {
         {/* subtle overlay to ensure contrast */}
         <div className="absolute inset-0 bg-black/10" />
 
-        {isMentorOrAdmin && (
+        {isInstructorOrAdmin && (
           <div className="absolute right-3 top-3">
             <StatusBadge
               status={

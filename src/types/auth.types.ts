@@ -1,6 +1,6 @@
 // src/types/auth.types.ts
 
-export type Role = 'learner' | 'mentor' | 'administrator';
+export type Role = 'learner' | 'instructor' | 'administrator';
 
 export interface User {
   user_id:    number;

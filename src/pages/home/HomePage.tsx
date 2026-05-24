@@ -798,7 +798,7 @@ const HomePage = () => {
     if (isAuthenticated && user) {
       const map: Record<string, string> = {
         learner:       '/dashboard',
-        mentor:        '/mentor',
+        instructor:        '/instructor',
         administrator: '/admin',
       };
       navigate(map[user.role] ?? '/dashboard');

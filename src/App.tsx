@@ -25,7 +25,7 @@ import GoogleCallbackPage from './pages/auth/GoogleCallbackPage';
 import CoursesPage from './pages/courses/CoursesPage';
 import CourseDetailPage from './pages/courses/CourseDetailPage';
 import NotFoundPage from './pages/NotFoundPage';
-import ApplyMentorPage from './pages/home/ApplyMentorPage';
+import ApplyInstructorPage from './pages/home/ApplyInstructorPage';
 
 // Learner pages
 import LearnerDashboard from './pages/dashboard/LearnerDashboard';
@@ -34,8 +34,8 @@ import ProgressPage from './pages/progress/ProgressPage';
 import CertificatesPage from './pages/certificates/CertificatesPage';
 import ExercisePage from './pages/exercises/ExercisePage';
 
-// Mentor pages
-import MentorDashboard from './pages/dashboard/MentorDashboard';
+// Instructor pages
+import InstructorDashboard from './pages/dashboard/InstructorDashboard';
 import CreateCoursePage from './pages/courses/CreateCoursePage';
 import CreateLessonPage from './pages/lessons/CreateLessonPage';
 import EditLessonPage from './pages/lessons/EditLessonPage';
@@ -50,8 +50,8 @@ import ExamSubmissionPage from './pages/exam/ExamSubmissionPage';
 import AdminPanel from './pages/dashboard/AdminPanel';
 import AdminUsers from './pages/dashboard/AdminUsers';
 import AdminCertificates from './pages/dashboard/AdminCertificates.tsx';
-import AdminMentors from './pages/dashboard/AdminMentors';
-import AdminMentorApplications from './pages/dashboard/AdminMentorApplications';
+import AdminInstructors from './pages/dashboard/AdminInstructors';
+import AdminInstructorApplications from './pages/dashboard/AdminInstructorApplications';
 
 // Shared pages
 import ChatPage from './pages/chat/ChatPage';
@@ -186,10 +186,10 @@ const App = () => {
       />
 
       <Route
-        path="/apply-mentor"
+        path="/apply-instructor"
         element={
           <PublicLayout>
-            <ApplyMentorPage />
+            <ApplyInstructorPage />
           </PublicLayout>
         }
       />
@@ -259,24 +259,24 @@ const App = () => {
           />
         </Route>
 
-        {/* ── Mentor + Admin Routes ─────────────── */}
+        {/* ── Instructor + Admin Routes ─────────────── */}
         <Route
           element={
-            <RoleGuard allowedRoles={['mentor', 'administrator']} />
+            <RoleGuard allowedRoles={['instructor', 'administrator']} />
           }
         >
 
           <Route
-            path="/mentor"
+            path="/instructor"
             element={
               <AuthLayout>
-                <MentorDashboard />
+                <InstructorDashboard />
               </AuthLayout>
             }
           />
 
           <Route
-            path="/mentor/courses/create"
+            path="/instructor/courses/create"
             element={
               <AuthLayout>
                 <CreateCoursePage />
@@ -285,7 +285,7 @@ const App = () => {
           />
 
           <Route
-            path="/mentor/courses/:course_id/lessons/create"
+            path="/instructor/courses/:course_id/lessons/create"
             element={
               <AuthLayout>
                 <CreateLessonPage />
@@ -294,7 +294,7 @@ const App = () => {
           />
 
           <Route
-            path="/mentor/courses/:course_id/materials/create"
+            path="/instructor/courses/:course_id/materials/create"
             element={
               <AuthLayout>
                 <CreateMaterialPage />
@@ -303,7 +303,7 @@ const App = () => {
           />
 
           <Route
-            path="/mentor/courses/:course_id/lessons/:lesson_id/edit"
+            path="/instructor/courses/:course_id/lessons/:lesson_id/edit"
             element={
               <AuthLayout>
                 <EditLessonPage />
@@ -331,9 +331,9 @@ const App = () => {
           }
         />
 
-        {/* ── Mentor Exam Routes ─────────────────── */}
+        {/* ── Instructor Exam Routes ─────────────────── */}
         <Route
-          path="/mentor/courses/:course_id/exam"
+          path="/instructor/courses/:course_id/exam"
           element={
             <AuthLayout>
               <ExamBuilderPage />
@@ -342,7 +342,7 @@ const App = () => {
         />
 
         <Route
-          path="/mentor/courses/:course_id/exam/review"
+          path="/instructor/courses/:course_id/exam/review"
           element={
             <AuthLayout>
               <ExamReviewPage />
@@ -351,7 +351,7 @@ const App = () => {
         />
 
         <Route
-          path="/mentor/courses/:course_id/exam/submission/:submission_id"
+          path="/instructor/courses/:course_id/exam/submission/:submission_id"
           element={
             <AuthLayout>
               <ExamSubmissionPage />
@@ -394,19 +394,19 @@ const App = () => {
           />
 
           <Route
-            path="/admin/mentors"
+            path="/admin/instructors"
             element={
               <AuthLayout>
-                <AdminMentors />
+                <AdminInstructors />
               </AuthLayout>
             }
           />
 
           <Route
-            path="/admin/mentor-applications"
+            path="/admin/instructor-applications"
             element={
               <AuthLayout>
-                <AdminMentorApplications />
+                <AdminInstructorApplications />
               </AuthLayout>
             }
           />

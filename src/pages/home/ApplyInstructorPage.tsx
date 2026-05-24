@@ -1,14 +1,14 @@
 import { useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
-import { mentorApplicationApi } from '../../api/mentor-application.api';
+import { instructorApplicationApi } from '../../api/instructor-application.api';
 import Card, { CardHeader, CardTitle, CardContent } from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
 import Input from '../../components/ui/Input';
 import { Upload, CheckCircle } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
-const ApplyMentorPage = () => {
+const ApplyInstructorPage = () => {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -29,7 +29,7 @@ const ApplyMentorPage = () => {
   const [isSubmitted, setIsSubmitted] = useState(false);
 
   const applyMutation = useMutation({
-    mutationFn: (data: FormData) => mentorApplicationApi.apply(data),
+    mutationFn: (data: FormData) => instructorApplicationApi.apply(data),
     onSuccess: () => {
       setIsSubmitted(true);
       toast.success('Application submitted successfully!');
@@ -81,7 +81,7 @@ const ApplyMentorPage = () => {
             <CheckCircle size={64} className="text-green-500 mb-6" />
             <h2 className="text-2xl font-bold text-gray-900 mb-4">Application Submitted!</h2>
             <p className="text-gray-600 mb-8 max-w-md">
-              Thank you for applying to be a mentor. Our team will review your application and get back to you via email shortly.
+              Thank you for applying to be a instructor. Our team will review your application and get back to you via email shortly.
             </p>
             <Link to="/">
               <Button>Return to Home</Button>
@@ -96,7 +96,7 @@ const ApplyMentorPage = () => {
     <div className="max-w-3xl mx-auto py-12 px-4">
       <div className="mb-8 text-center">
         <h1 className="text-4xl font-extrabold text-gray-900 tracking-tight mb-4">
-          Become a Mentor
+          Become a Instructor
         </h1>
         <p className="text-lg text-gray-600 max-w-2xl mx-auto">
           Share your expertise and help guide the next generation of digital professionals. Fill out the application below to get started.
@@ -105,7 +105,7 @@ const ApplyMentorPage = () => {
 
       <Card padding="lg" className="shadow-lg">
         <CardHeader>
-          <CardTitle>Mentor Application Form</CardTitle>
+          <CardTitle>Instructor Application Form</CardTitle>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-6 mt-4">
@@ -246,4 +246,4 @@ const ApplyMentorPage = () => {
   );
 };
 
-export default ApplyMentorPage;
+export default ApplyInstructorPage;

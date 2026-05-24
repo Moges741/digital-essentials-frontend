@@ -5,7 +5,7 @@ import type {
   FinalExam,
   ExamWithQuestions,
   ExamResult,
-  ExamSubmissionForMentor,
+  ExamSubmissionForInstructor,
   ExamAnswerWithQuestion,
   CreateExamBody,
   CreateQuestionBody,
@@ -84,8 +84,8 @@ export const examApi = {
 
   getSubmissions: async (
     course_id: number
-  ): Promise<ExamSubmissionForMentor[]> => {
-    const res = await apiClient.get<ApiResponse<{ submissions: ExamSubmissionForMentor[] }>>(
+  ): Promise<ExamSubmissionForInstructor[]> => {
+    const res = await apiClient.get<ApiResponse<{ submissions: ExamSubmissionForInstructor[] }>>(
       `/courses/${course_id}/exam/submissions`
     );
     return res.data.data.submissions;
@@ -94,8 +94,8 @@ export const examApi = {
   getSubmission: async (
     course_id: number,
     submission_id: number
-  ): Promise<ExamSubmissionForMentor & { answers: ExamAnswerWithQuestion[] }> => {
-    const res = await apiClient.get<ApiResponse<{ submission: ExamSubmissionForMentor & { answers: ExamAnswerWithQuestion[] } }>>(
+  ): Promise<ExamSubmissionForInstructor & { answers: ExamAnswerWithQuestion[] }> => {
+    const res = await apiClient.get<ApiResponse<{ submission: ExamSubmissionForInstructor & { answers: ExamAnswerWithQuestion[] } }>>(
       `/courses/${course_id}/exam/submissions/${submission_id}`
     );
     return res.data.data.submission;

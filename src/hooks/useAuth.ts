@@ -7,7 +7,7 @@ import { useAuthStore } from '../store/auth.store';
 import type { LoginBody, RegisterBody, Role } from '../types/auth.types';
 
 const getDashboardByRole = (role: Role): string => {
-  if (role === 'mentor')        return '/mentor';
+  if (role === 'instructor')        return '/instructor';
   if (role === 'administrator') return '/admin';
   return '/dashboard';
 };

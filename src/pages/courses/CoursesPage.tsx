@@ -103,7 +103,7 @@ const CoursesPage = () => {
   }, [data?.courses]);
 
   const canCreateCourse =
-    user?.role === ROLES.MENTOR || user?.role === ROLES.ADMINISTRATOR;
+    user?.role === ROLES.INSTRUCTOR || user?.role === ROLES.ADMINISTRATOR;
 
   // ── Loading ───────────────────────────────────────────────
   if (isLoading) return <PageSpinner />;
@@ -167,10 +167,10 @@ const CoursesPage = () => {
           </p>
         </div>
 
-        {/* Create course button — mentor and admin only */}
+        {/* Create course button — instructor and admin only */}
         {canCreateCourse && (
           <Button
-            onClick={() => navigate('/mentor/courses/create')}
+            onClick={() => navigate('/instructor/courses/create')}
             leftIcon={<Plus size={16} />}
           >
             Create Course
@@ -319,7 +319,7 @@ const CoursesPage = () => {
             description="Check back soon or create the first course!"
             action={
               canCreateCourse
-                ? { label: 'Create First Course', onClick: () => navigate('/mentor/courses/create') }
+                ? { label: 'Create First Course', onClick: () => navigate('/instructor/courses/create') }
                 : undefined
             }
           />

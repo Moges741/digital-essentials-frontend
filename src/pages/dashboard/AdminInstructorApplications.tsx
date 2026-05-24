@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Search, FileText, CheckCircle, XCircle, Clock } from 'lucide-react';
 import toast from 'react-hot-toast';
-import { mentorApplicationApi,  } from '../../api/mentor-application.api';
+import { instructorApplicationApi,  } from '../../api/instructor-application.api';
 import Card, { CardHeader, CardTitle } from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
 import Input from '../../components/ui/Input';
@@ -11,24 +11,24 @@ import Badge from '../../components/ui/Badge';
 import { PageSpinner } from '../../components/ui/Spinner';
 import { formatDate } from '../../utils/format';
 
-const AdminMentorApplications = () => {
+const AdminInstructorApplications = () => {
   const queryClient = useQueryClient();
   const [search, setSearch] = useState('');
 
   const { data: applications, isLoading } = useQuery({
-    queryKey: ['admin', 'mentor-applications'],
-    queryFn: mentorApplicationApi.getAll,
+    queryKey: ['admin', 'instructor-applications'],
+    queryFn: instructorApplicationApi.getAll,
   });
 
   const updateStatusMutation = useMutation({
     mutationFn: ({ id, status }: { id: number; status: 'approved' | 'rejected' }) =>
-      mentorApplicationApi.updateStatus(id, status),
+      instructorApplicationApi.updateStatus(id, status),
     onSuccess: (data) => {
       toast.success(`Application ${data.status} successfully`);
-      queryClient.invalidateQueries({ queryKey: ['admin', 'mentor-applications'] });
-      // Also invalidate mentors list if approved
+      queryClient.invalidateQueries({ queryKey: ['admin', 'instructor-applications'] });
+      // Also invalidate instructors list if approved
       if (data.status === 'approved') {
-        queryClient.invalidateQueries({ queryKey: ['admin', 'mentors'] });
+        queryClient.invalidateQueries({ queryKey: ['admin', 'instructors'] });
       }
     },
     onError: (error: any) => {
@@ -53,10 +53,10 @@ const AdminMentorApplications = () => {
       <div>
         <div className="flex items-center gap-2 mb-1">
           <FileText size={18} className="text-primary-600" />
-          <h1 className="text-2xl font-bold text-gray-900">Mentor Applications</h1>
+          <h1 className="text-2xl font-bold text-gray-900">Instructor Applications</h1>
         </div>
         <p className="text-sm text-gray-500">
-          Review and approve or reject applications to become a mentor
+          Review and approve or reject applications to become a instructor
         </p>
       </div>
 
@@ -78,7 +78,7 @@ const AdminMentorApplications = () => {
           <EmptyState
             icon={<FileText size={24} />}
             title={search ? 'No applications match your search' : 'No applications yet'}
-            description="When users apply to be mentors, their applications will appear here."
+            description="When users apply to be instructors, their applications will appear here."
           />
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
@@ -199,4 +199,4 @@ const AdminMentorApplications = () => {
   );
 };
 
-export default AdminMentorApplications;
+export default AdminInstructorApplications;

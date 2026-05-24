@@ -16,7 +16,7 @@ export const useMyFeedback = () => {
   });
 };
 
-// ── Course feedback (mentor/admin) ────────────────────────────
+// ── Course feedback (instructor/admin) ────────────────────────────
 export const useCourseFeedback = (course_id: number) => {
   return useQuery({
     queryKey: [QUERY_KEYS.FEEDBACK, course_id],

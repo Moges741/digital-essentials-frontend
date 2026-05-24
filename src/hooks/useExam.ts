@@ -111,7 +111,7 @@ export const useGradeAnswer = (course_id: number) => {
       is_correct:    boolean;
     }) => examApi.gradeAnswer(course_id, submission_id, answer_id, is_correct),
     onSuccess: () => {
-      // Invalidate mentor's submission review data
+      // Invalidate instructor's submission review data
       queryClient.invalidateQueries({
         queryKey: [EXAM_KEY, course_id, 'submissions'],
       });

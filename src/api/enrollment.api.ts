@@ -29,7 +29,7 @@ export const enrollmentApi = {
   },
 
   // GET /api/enrollments/course/:course_id
-  // mentor (own course), admin
+  // instructor (own course), admin
   getByCourse: async (course_id: number): Promise<any[]> => {
     const res = await apiClient.get<ApiResponse<{ enrollments: any[] }>>(
       `/enrollments/course/${course_id}`

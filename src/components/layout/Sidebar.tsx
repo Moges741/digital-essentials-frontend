@@ -64,14 +64,14 @@ const learnerNav: NavGroup[] = [
   },
 ];
 
-// ── Mentor navigation ─────────────────────────────────────────
-const mentorNav: NavGroup[] = [
+// ── Instructor navigation ─────────────────────────────────────────
+const instructorNav: NavGroup[] = [
   {
     group: 'Teaching',
     items: [
       {
         label: 'Dashboard',
-        to:    '/mentor',
+        to:    '/instructor',
         icon:  <LayoutDashboard size={17} />,
         end:   true,
       },
@@ -82,7 +82,7 @@ const mentorNav: NavGroup[] = [
       },
       {
         label: 'Create Course',
-        to:    '/mentor/courses/create',
+        to:    '/instructor/courses/create',
         icon:  <PlusCircle size={17} />,
       },
     ],
@@ -126,13 +126,13 @@ const adminNav: NavGroup[] = [
         icon:  <ScrollText size={17} />,
       },
       {
-        label: 'Mentor Applications',
-        to:    '/admin/mentor-applications',
+        label: 'Instructor Applications',
+        to:    '/admin/instructor-applications',
         icon:  <FileText size={17} />,
       },
        {
-        label :'Mentors',
-        to:    '/admin/mentors',
+        label :'Instructors',
+        to:    '/admin/instructors',
         icon:  <Users size={17} />,
       }
     ],
@@ -151,7 +151,7 @@ const adminNav: NavGroup[] = [
 
 const navByRole: Record<string, NavGroup[]> = {
   learner:       learnerNav,
-  mentor:        mentorNav,
+  instructor:        instructorNav,
   administrator: adminNav,
 };
 

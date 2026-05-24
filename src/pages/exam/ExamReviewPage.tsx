@@ -1,5 +1,5 @@
 // src/pages/exam/ExamReviewPage.tsx
-// Mentor reviews short answer submissions and grades them
+// Instructor reviews short answer submissions and grades them
 
 import { useParams, useNavigate } from 'react-router-dom';
 import {
@@ -37,7 +37,7 @@ const ExamReviewPage = () => {
       <div className="flex items-center justify-between">
         <div>
           <button
-            onClick={() => navigate(`/mentor`)}
+            onClick={() => navigate(`/instructor`)}
             className="flex items-center gap-2 text-sm
                          text-gray-500 hover:text-gray-700 mb-2"
           >
@@ -106,7 +106,7 @@ const ExamReviewPage = () => {
                     className="mt-2"
                     onClick={() =>
                       navigate(
-                        `/mentor/courses/${courseId}/exam/submission/${sub.submission_id}`
+                        `/instructor/courses/${courseId}/exam/submission/${sub.submission_id}`
                       )
                     }
                   >

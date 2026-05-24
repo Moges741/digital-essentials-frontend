@@ -326,7 +326,7 @@ const CourseDetailPage = () => {
               {canManage && (
                 <Card padding="sm" className="min-w-[220px] border-amber-200 bg-amber-50">
                   <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-amber-700">
-                    Mentor tools
+                    Instructor tools
                   </p>
                   <div className="flex flex-wrap gap-2">
                     <Button
@@ -338,12 +338,12 @@ const CourseDetailPage = () => {
                     >
                       {course.is_published ? 'Unpublish' : 'Publish'}
                     </Button>
-                    <Link to={`/mentor/courses/create?edit=${course.course_id}`}>
+                    <Link to={`/instructor/courses/create?edit=${course.course_id}`}>
                       <Button variant="secondary" size="sm">
                         Edit
                       </Button>
                     </Link>
-                    <Link to={`/mentor/courses/${course.course_id}/exam`}>
+                    <Link to={`/instructor/courses/${course.course_id}/exam`}>
                       <Button variant="secondary" size="sm" leftIcon={<ClipboardList size={13} />}>
                         Exam
                       </Button>
@@ -536,7 +536,7 @@ const CourseDetailPage = () => {
                     canManage
                       ? {
                           label: 'Create lesson',
-                          onClick: () => navigate(`/mentor/courses/${courseId}/lessons/create`),
+                          onClick: () => navigate(`/instructor/courses/${courseId}/lessons/create`),
                         }
                       : undefined
                   }

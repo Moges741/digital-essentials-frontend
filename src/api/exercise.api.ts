@@ -43,7 +43,7 @@ export const exerciseApi = {
   },
 
   // GET /api/courses/:course_id/exercises/:exercise_id/submissions
-  // Mentor/admin view all learner submissions
+  // Instructor/admin view all learner submissions
   getSubmissions: async (
     course_id:   number,
     exercise_id: number
@@ -69,7 +69,7 @@ export const exerciseApi = {
   },
 
   // DELETE /api/courses/:course_id/exercises/:exercise_id
-  // mentor (own), admin
+  // instructor (own), admin
   delete: async (
     course_id:   number,
     exercise_id: number

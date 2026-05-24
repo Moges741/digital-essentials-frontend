@@ -60,7 +60,7 @@ const Badge = ({
 export const RoleBadge = ({ role }: { role: string }) => {
   const map: Record<string, { variant: BadgeVariant; label: string }> = {
     learner:       { variant: 'primary', label: 'Learner' },
-    mentor:        { variant: 'success', label: 'Mentor' },
+    instructor:        { variant: 'success', label: 'Instructor' },
     administrator: { variant: 'warning', label: 'Admin' },
   };
   const config = map[role] ?? { variant: 'neutral', label: role };

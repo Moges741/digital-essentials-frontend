@@ -18,7 +18,7 @@ export interface ExamQuestion {
   option_c:      string | null;
   option_d:      string | null;
   question_order: number;
-  // Only present in mentor view
+  // Only present in instructor view
   correct_answer?: string | null;
 }
 
@@ -51,7 +51,7 @@ export interface ExamResult {
   answers:         ExamAnswerWithQuestion[];
 }
 
-export interface ExamSubmissionForMentor {
+export interface ExamSubmissionForInstructor {
   submission_id:   number;
   user_id:         number;
   learner_name:    string;

@@ -144,7 +144,7 @@ const LoginPage = () => {
           </p> */}
           {/* <div className="flex flex-col gap-1 text-xs text-amber-600">
             <span>Learner: yonas123@test.com / password123</span>
-            <span>Mentor:  yonas@test.com / password123</span>
+            <span>Instructor:  yonas@test.com / password123</span>
             <span>Admin:   admin@test.com / password123</span>
           </div> */}
         </div>

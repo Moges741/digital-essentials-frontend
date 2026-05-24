@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Search, Users, Award, Mail, Edit2 } from 'lucide-react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
-import { adminApi, type AdminMentor } from '../../api/admin.api';
+import { adminApi, type AdminInstructor } from '../../api/admin.api';
 import Card, { CardHeader, CardTitle } from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
 import Input from '../../components/ui/Input';
@@ -12,20 +12,20 @@ import { PageSpinner } from '../../components/ui/Spinner';
 import Badge from '../../components/ui/Badge';
 import { formatDate } from '../../utils/format';
 
-const useAllMentors = () => {
+const useAllInstructors = () => {
   return useQuery({
-    queryKey: ['admin', 'mentors'],
-    queryFn: adminApi.getAllMentors,
+    queryKey: ['admin', 'instructors'],
+    queryFn: adminApi.getAllInstructors,
   });
 };
 
-const AdminMentors = () => {
+const AdminInstructors = () => {
   const queryClient = useQueryClient();
-  const { data: mentors, isLoading } = useAllMentors();
+  const { data: instructors, isLoading } = useAllInstructors();
   const [search, setSearch] = useState('');
   const [editModal, setEditModal] = useState<{
     isOpen: boolean;
-    mentor?: AdminMentor;
+    instructor?: AdminInstructor;
   }>({ isOpen: false });
 
   const [form, setForm] = useState({
@@ -40,43 +40,43 @@ const AdminMentors = () => {
 
   const updateMutation = useMutation({
     mutationFn: () => {
-      if (!editModal.mentor) {
-        throw new Error('No mentor selected');
+      if (!editModal.instructor) {
+        throw new Error('No instructor selected');
       }
 
-      return adminApi.updateMentorProfile(editModal.mentor.user_id, {
+      return adminApi.updateInstructorProfile(editModal.instructor.user_id, {
         specialization: form.specialization.trim(),
         qualifications: form.qualifications.trim() === '' ? undefined : form.qualifications.trim(),
       });
     },
     onSuccess: () => {
-      toast.success('Mentor profile updated successfully');
+      toast.success('Instructor profile updated successfully');
       closeEditModal();
-      queryClient.invalidateQueries({ queryKey: ['admin', 'mentors'] });
+      queryClient.invalidateQueries({ queryKey: ['admin', 'instructors'] });
     },
     onError: () => {
-      toast.error('Unable to update mentor profile');
+      toast.error('Unable to update instructor profile');
     },
   });
 
-  const openEditModal = (mentor: AdminMentor) => {
-    setEditModal({ isOpen: true, mentor });
+  const openEditModal = (instructor: AdminInstructor) => {
+    setEditModal({ isOpen: true, instructor });
     setForm({
-      specialization: mentor.specialization,
-      qualifications: mentor.qualifications || '',
+      specialization: instructor.specialization,
+      qualifications: instructor.qualifications || '',
     });
   };
 
   if (isLoading) return <PageSpinner />;
 
-  const allMentors = mentors ?? [];
-  const filteredMentors = allMentors.filter((mentor) => {
+  const allInstructors = instructors ?? [];
+  const filteredInstructors = allInstructors.filter((instructor) => {
     const q = search.trim().toLowerCase();
     if (!q) return true;
     return (
-      mentor.name.toLowerCase().includes(q) ||
-      mentor.email.toLowerCase().includes(q) ||
-      mentor.specialization.toLowerCase().includes(q)
+      instructor.name.toLowerCase().includes(q) ||
+      instructor.email.toLowerCase().includes(q) ||
+      instructor.specialization.toLowerCase().includes(q)
     );
   });
 
@@ -85,16 +85,16 @@ const AdminMentors = () => {
       <div>
         <div className="flex items-center gap-2 mb-1">
           <Award size={18} className="text-primary-600" />
-          <h1 className="text-2xl font-bold text-gray-900">Manage Mentors</h1>
+          <h1 className="text-2xl font-bold text-gray-900">Manage Instructors</h1>
         </div>
         <p className="text-sm text-gray-500">
-          View and manage mentor specializations and qualifications
+          View and manage instructor specializations and qualifications
         </p>
       </div>
 
       <Card padding="md">
         <CardHeader>
-          <CardTitle>All Mentors ({filteredMentors.length})</CardTitle>
+          <CardTitle>All Instructors ({filteredInstructors.length})</CardTitle>
         </CardHeader>
 
         <div className="mb-6">
@@ -106,33 +106,33 @@ const AdminMentors = () => {
           />
         </div>
 
-        {filteredMentors.length === 0 ? (
+        {filteredInstructors.length === 0 ? (
           <EmptyState
             icon={<Users size={24} />}
-            title={search ? 'No mentors match your search' : 'No mentors yet'}
-            description="Mentors will appear here when users register with mentor role"
+            title={search ? 'No instructors match your search' : 'No instructors yet'}
+            description="Instructors will appear here when users register with instructor role"
           />
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            {filteredMentors.map((mentor) => (
+            {filteredInstructors.map((instructor) => (
               <div
-                key={mentor.user_id}
+                key={instructor.user_id}
                 className="border border-gray-200 rounded-xl p-5 hover:border-primary-300 hover:shadow-md transition-all"
               >
                 {/* Header */}
                 <div className="flex items-start justify-between mb-4">
                   <div className="flex-1">
-                    <h3 className="text-sm font-semibold text-gray-900">{mentor.name}</h3>
+                    <h3 className="text-sm font-semibold text-gray-900">{instructor.name}</h3>
                     <p className="text-xs text-gray-500 flex items-center gap-1 mt-1">
                       <Mail size={12} />
-                      {mentor.email}
+                      {instructor.email}
                     </p>
                   </div>
                   <Badge
-                    variant={mentor.is_active ? 'success' : 'neutral'}
+                    variant={instructor.is_active ? 'success' : 'neutral'}
                     size="sm"
                   >
-                    {mentor.is_active ? 'Active' : 'Inactive'}
+                    {instructor.is_active ? 'Active' : 'Inactive'}
                   </Badge>
                 </div>
 
@@ -144,18 +144,18 @@ const AdminMentors = () => {
                       Specialization
                     </p>
                     <p className="text-sm font-semibold text-primary-700">
-                      {mentor.specialization}
+                      {instructor.specialization}
                     </p>
                   </div>
 
                   {/* Qualifications */}
-                  {mentor.qualifications && (
+                  {instructor.qualifications && (
                     <div className="bg-blue-50 rounded-lg p-3">
                       <p className="text-xs text-gray-600 font-medium uppercase tracking-wide mb-1">
                         Qualifications
                       </p>
                       <p className="text-sm text-blue-700 line-clamp-2">
-                        {mentor.qualifications}
+                        {instructor.qualifications}
                       </p>
                     </div>
                   )}
@@ -164,11 +164,11 @@ const AdminMentors = () => {
                   <div className="grid grid-cols-2 gap-2 text-xs">
                     <div className="text-gray-600">
                       <p className="font-medium text-gray-500">Joined</p>
-                      <p className="text-gray-700 mt-0.5">{formatDate(mentor.created_at)}</p>
+                      <p className="text-gray-700 mt-0.5">{formatDate(instructor.created_at)}</p>
                     </div>
                     <div className="text-gray-600">
                       <p className="font-medium text-gray-500">Updated</p>
-                      <p className="text-gray-700 mt-0.5">{formatDate(mentor.updated_at)}</p>
+                      <p className="text-gray-700 mt-0.5">{formatDate(instructor.updated_at)}</p>
                     </div>
                   </div>
                 </div>
@@ -178,7 +178,7 @@ const AdminMentors = () => {
                   variant="primary"
                   size="sm"
                   fullWidth
-                  onClick={() => openEditModal(mentor)}
+                  onClick={() => openEditModal(instructor)}
                   className="flex items-center justify-center gap-2"
                 >
                   <Edit2 size={14} />
@@ -194,7 +194,7 @@ const AdminMentors = () => {
       <Modal
         isOpen={editModal.isOpen}
         onClose={closeEditModal}
-        title={`Edit Mentor: ${editModal.mentor?.name}`}
+        title={`Edit Instructor: ${editModal.instructor?.name}`}
         size="lg"
         footer={
           <>
@@ -222,7 +222,7 @@ const AdminMentors = () => {
             <input
               type="email"
               disabled
-              value={editModal.mentor?.email || ''}
+              value={editModal.instructor?.email || ''}
               className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm bg-gray-50 text-gray-600"
             />
           </div>
@@ -274,7 +274,7 @@ const AdminMentors = () => {
           {/* Info Box */}
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
             <p className="text-xs text-blue-700">
-              <strong>Note:</strong> Changes will be visible immediately to learners and mentors in the system.
+              <strong>Note:</strong> Changes will be visible immediately to learners and instructors in the system.
             </p>
           </div>
         </div>
@@ -283,4 +283,4 @@ const AdminMentors = () => {
   );
 };
 
-export default AdminMentors;
+export default AdminInstructors;
